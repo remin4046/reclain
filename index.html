@@ -1097,7 +1097,7 @@ const SB_URL='https://vxsuhnjifptfyfpbhpnq.supabase.co',SB_KEY='sb_publishable_A
 let SB=null,SESSION=null,USERNAME='',CHAN=null,MY_NONCE=Math.random().toString(36).slice(2);
 function sbReady(){return SB_URL.startsWith('https://')&&window.supabase;}
 const Store={mode:'online',
-  async init(){if(!sbReady())return;SB=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});const{data}=await SB.auth.getSession();SESSION=data.session;if(SESSION)await loadProfile();},
+  async init(){if(!sbReady())return;SB=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true},realtime:{worker:true,heartbeatIntervalMs:15000}});const{data}=await SB.auth.getSession();SESSION=data.session;if(SESSION)await loadProfile();},
   async list(){const{data,error}=await SB.from('characters').select('id,data,updated_at').order('updated_at',{ascending:true});if(error){log&&console.warn(error);throw error;}
     return(data||[]).map(r=>{const p=r.data;p.id=r.id;return p;}).sort((a,b)=>(a.created||0)-(b.created||0));},
   saving:false,
@@ -1147,7 +1147,12 @@ function initRoom(){if(CHAN||!SESSION)return;
     for(const k of [...G.peers.keys()])if(!seen.has(k))G.peers.delete(k);renderOnline();});
   CHAN.on('broadcast',{event:'chat'},({payload:d})=>{if(!d||typeof d.t!=='string')return;log(String(d.n||'?').slice(0,12)+': '+d.t.slice(0,80),d.u===SESSION.user.id?'c-chat':'c-peer');});
   CHAN.on('broadcast',{event:'kick'},({payload:d})=>{if(d&&d.u===SESSION.user.id&&d.nonce!==MY_NONCE){P&&saveNow(true);P=null;CHAN&&SB.removeChannel(CHAN);CHAN=null;G.peers.clear();showAuth('다른 곳에서 같은 계정으로 접속하여 연결이 종료되었습니다.');}});
-  CHAN.subscribe(s=>{if(s==='SUBSCRIBED'){CHAN.send({type:'broadcast',event:'kick',payload:{u:SESSION.user.id,nonce:MY_NONCE}});pushPresence(true);}});}
+  const ch=CHAN;ch.subscribe(s=>{if(ch!==CHAN)return;if(s==='SUBSCRIBED'){lastPresSig='';CHAN.send({type:'broadcast',event:'kick',payload:{u:SESSION.user.id,nonce:MY_NONCE}});pushPresence(true);}
+    else if(s==='CHANNEL_ERROR'||s==='TIMED_OUT'||s==='CLOSED'){reconnectRoom();}});}
+// 연결이 끊기면 자동 재접속 (탭 전환·네트워크 끊김 대비)
+let reconnT=0;function reconnectRoom(){if(reconnT)return;reconnT=setTimeout(()=>{reconnT=0;if(!SESSION||!P)return;const old=CHAN;CHAN=null;G.peers.clear();renderOnline();try{old&&SB.removeChannel(old);}catch(e){}initRoom();},1500);}
+setInterval(()=>{if(SESSION&&P&&(!CHAN||(CHAN.state!=='joined'&&CHAN.state!=='joining')))reconnectRoom();else if(CHAN&&CHAN.state==='joined')pushPresence(true);},5000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&SESSION&&P){if(!CHAN||CHAN.state!=='joined')reconnectRoom();else pushPresence(true);}});
 function pushPresence(force){if(!CHAN||!P)return;const now=performance.now();if(!force&&now-lastPres<250)return;
   const o={n:P.name,lk:P.look,lv:P.lv,m:P.map,x:P.x,y:P.y,d:P.dir||'S',hp:Math.round(P.hp/Math.max(1,P.mhp)*100),w:(eqItem('weapon')||{}).n||null,sh:!!P.eq.shield,at:P.atkT?Math.floor(P.atkT):0};
   const sig=JSON.stringify(o);if(sig===lastPresSig&&!force)return;lastPres=now;lastPresSig=sig;CHAN.track(o).catch(()=>{});}
