@@ -117,7 +117,7 @@ table.t th{color:var(--gold);position:sticky;top:0;background:#16110b}
     <div class="bar" id="exb"><i></i><em></em></div>
     <div class="lv" id="sgold"></div>
   </div>
-  <div id="mini" class="panel"><div class="mapn" id="mapn"></div><canvas id="mcv" width="200" height="200"></canvas><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:11px"><span id="fps" class="note">-</span><select id="qsel" style="background:#0d0a07;color:#e9e2d0;border:1px solid #6b5532;font-size:11px;border-radius:3px"><option value="a">화질 자동</option><option value="0">고화질</option><option value="1">표준</option><option value="2">성능</option></select></div></div>
+  <div id="mini" class="panel"><div class="mapn" id="mapn"></div><canvas id="mcv" width="200" height="200"></canvas><div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-size:11px"><span id="fps" class="note">-</span><select id="qsel" style="background:#0d0a07;color:#e9e2d0;border:1px solid #6b5532;font-size:11px;border-radius:3px"><option value="a">화질 자동</option><option value="0">고화질</option><option value="1">표준</option><option value="2">성능</option><option value="3">최대 성능</option></select></div></div>
   <div id="online" class="panel hidden"></div>
   <div id="diag" class="panel hidden" style="position:absolute;right:10px;top:360px;width:300px;padding:8px 10px;font-size:11.5px;line-height:1.55"></div>
   <div id="hot" class="panel"></div>
@@ -881,7 +881,12 @@ function render(){
   const _t4=performance.now();DIAG.add('ground',_t1-_t0);DIAG.add('objects',_t2-_t1);DIAG.add('effects',_t3-_t2);DIAG.add('minimap',_t4-_t3);DIAG.draws=draws.length;
 }
 function shadow(sx,sy,r){ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(sx,sy,r,r*.45,0,0,7);ctx.fill();}
-function label(t,sx,sy,col,bg){ctx.font='bold 12px "Noto Sans KR",sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.75)';ctx.strokeText(t,sx,sy);ctx.fillStyle=col;ctx.fillText(t,sx,sy);}
+const LBL=new Map();try{document.fonts&&document.fonts.addEventListener('loadingdone',()=>LBL.clear());}catch(e){}
+function label(t,sx,sy,col,bg){const k=t+'|'+col;let c=LBL.get(k);
+  if(!c){const F='bold 12px "Noto Sans KR",sans-serif',S=2;c=document.createElement('canvas');const x=c.getContext('2d');x.font=F;const w=Math.ceil(x.measureText(t).width)+8;
+    c.width=w*S;c.height=20*S;x.scale(S,S);x.font=F;x.textAlign='center';x.lineWidth=3;x.lineJoin='round';x.strokeStyle='rgba(0,0,0,.75)';x.strokeText(t,w/2,14);x.fillStyle=col;x.fillText(t,w/2,14);c.w=w;
+    if(LBL.size>400)LBL.clear();LBL.set(k,c);}
+  ctx.drawImage(c,Math.round(sx-c.w/2),Math.round(sy-14),c.w,20);}
 function hpbar(sx,sy,r,col){ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(sx-20,sy,40,5);ctx.fillStyle=col||'#d33';ctx.fillRect(sx-19,sy+1,38*Math.max(0,r),3);}
 function drawGroundItem(g,sx,sy){const d=ITEM(g.n);const bob=Math.sin(G.time/300+g.x)*1.5;shadow(sx,sy,8);
   if(g.n==='아데나'){ctx.fillStyle='#e8c040';for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(sx-4+i*4,sy-3-i*2+bob,5,3,0,0,7);ctx.fill();ctx.strokeStyle='#8a6a10';ctx.stroke();}}
@@ -1232,7 +1237,7 @@ function setupInput(){
   addEventListener('beforeunload',()=>{if(P&&G.saveDirty)saveNow(true);});}
 // ---------- loop ----------
 let lastT=performance.now();
-const QUALITY=[{name:'고화질',dpr:2},{name:'표준',dpr:1.25},{name:'성능',dpr:1}];
+const QUALITY=[{name:'고화질',dpr:2},{name:'표준',dpr:1.25},{name:'성능',dpr:1},{name:'최대 성능',dpr:.75}];
 const PERF={acc:0,n:0,fps:60,worst:0,hist:[],q:1,auto:true,lastAdapt:0};
 try{const s=window.localStorage&&localStorage.getItem('reclain_q');if(s){const o=JSON.parse(s);PERF.q=o.q;PERF.auto=o.auto;}}catch(e){}
 function showDiag(){const el=$('#diag');if(!DIAG.on){DIAG.acc={};DIAG.n=0;return;}const n=Math.max(1,DIAG.n),a=DIAG.acc,g=DIAG.gpuInfo(),f=v=>((v||0)/n).toFixed(1)+'ms';
@@ -1242,7 +1247,7 @@ function showDiag(){const el=$('#diag');if(!DIAG.on){DIAG.acc={};DIAG.n=0;return
   DIAG.acc={};DIAG.n=0;}
 function setQuality(q,auto){PERF.q=q;PERF.auto=auto;try{localStorage.setItem('reclain_q',JSON.stringify({q,auto}));}catch(e){}resize();for(const k in OVL)delete OVL[k];}
 function adaptQuality(){if(!PERF.auto||PERF.hist.length<3||performance.now()-PERF.lastAdapt<5000)return;const avg=PERF.hist.reduce((a,b)=>a+b)/PERF.hist.length;
-  if(avg<40&&PERF.q<2){PERF.lastAdapt=performance.now();setQuality(PERF.q+1,true);PERF.hist=[];}else if(avg>58&&PERF.q>0&&(window.devicePixelRatio||1)>1.3&&PERF.hiOk!==false){}}
+  if(avg<45&&PERF.q<QUALITY.length-1){PERF.lastAdapt=performance.now();setQuality(PERF.q+1,true);PERF.hist=[];}else if(avg>58&&PERF.q>0&&(window.devicePixelRatio||1)>1.3&&PERF.hiOk!==false){}}
 function loop(t){const dt=Math.min(100,t-lastT);lastT=t;
   if(P&&G.map){const _l0=performance.now();G.time+=dt;const C=calc();if(!G.dead){stepPlayer(dt,C);if(G.npcGo&&(!G.path||!G.path.length)){const o=G.npcGo;G.npcGo=null;if(Math.max(Math.abs(o.x-P.x),Math.abs(o.y-P.y))<=2)openNpc(o);}}
     updMons(dt);updPeers(dt);tickRegen(dt);const _l1=performance.now();render();const _l2=performance.now();warmStep();DIAG.add('logic',_l1-_l0);DIAG.add('render',_l2-_l1);DIAG.add('frame',dt);DIAG.n++;
@@ -1250,7 +1255,7 @@ function loop(t){const dt=Math.min(100,t-lastT);lastT=t;
     saveT+=dt;if(saveT>20000){saveT=0;if(G.saveDirty)saveNow(true);}
     if(G.time%1000<dt)pushPresence();}
   requestAnimationFrame(loop);}
-async function boot(){cv=$('#cv');ctx=cv.getContext('2d');resize();makeTex();setupInput();
+async function boot(){cv=$('#cv');ctx=cv.getContext('2d',{alpha:false});resize();makeTex();setupInput();
   await Store.init();if(SESSION)onLogin();else showAuth();requestAnimationFrame(loop);}
 boot();
 
