@@ -765,7 +765,7 @@ function calc(){
     mhpB:o['최대 HP']||o.HP||0,mmpB:o['최대 MP']||o.MP||0,
     wsub:wd?wd.sub:null,wname:w?w.n:null,ranged:wd&&wd.sub==='활',range:wd&&wd.sub==='활'?8:(wd&&wd.sub==='창'?2:1)};
   const col={'한손검':'한손검','둔기':'도끼','창':'창','활':'활','지팡이':'지팡이','단검':'단검','양손검':'양손검'}[r.wsub]||'주먹';
-  r.aspd=GD.speed[P.cls][col]||1000;r.mspd=(GD.speed[P.cls]['이동']||667)/1.5;
+  r.aspd=GD.speed[P.cls][col]||1000;r.mspd=(GD.speed[P.cls]['이동']||667)/2.5;
   if(b.haste>now){r.aspd*=0.75;r.mspd*=0.7;}
   return r;
 }
@@ -848,17 +848,19 @@ function meleeResolve(m,C,arrow){if(m.dead)return;const w=eqItem('weapon'),wd=w?
   if(C.ranged){const ad=ITEM(arrow);d+=rnd(1,ad.ds||4);d+=C.rdmg;}else d+=C.mdmg;
   if(G.buffs.bash){d=Math.round(d*1.8);G.buffs.bash=0;addFx('slash',m.x,m.y,'#ffd060');}
   d=Math.max(1,d);damageMon(m,d);}
-function damageMon(m,d,col){m.hp-=d;m.hitT=G.time;m.attacked=true;addFloat(m.x,m.y,d,col||'#fff');
+function damageMon(m,d,col,by){m.hp-=d;m.killer=by||P;m.hitT=G.time;m.attacked=true;addFloat(m.x,m.y,d,col||'#fff');
   if(m.dummy){m.hp=m.mhp;return;}
-  if(m.hp<=0)killMon(m);}
-function killMon(m){m.dead=true;m.respawn=G.time+(m.boss?300000:25000+Math.random()*15000);if(G.target===m)G.target=null;
-  gainExp(m.exp);dropLoot(m);if(m.boss)toast(m.n+' 처치!');}
-function dropLoot(m){const list=GD.drops[m.n]||GD.drops[m.n.split(' (')[0]]||[];const out=[];
+  if(m.hp<=0)killMon(m,m.killer);}
+function killMon(m,killer){killer=killer||P;m.dead=true;m.respawn=G.time+(m.boss?300000:25000+Math.random()*15000);if(G.target===m)G.target=null;
+  gainExp(m.exp);dropLoot(m,killer);if(m.boss)toast(m.n+' 처치!');}
+function dropLoot(m,killer){killer=killer||P;const list=GD.drops[m.n]||GD.drops[m.n.split(' (')[0]]||[];const out=[];
   if(Math.random()<.75)out.push(['아데나',rnd(m.lv*2,m.lv*8)*(m.boss?20:1)]);
   for(const n of list){if(n==='아데나')continue;const d=ITEM(n);let p=d.cat==='소비/제작'?.08:d.cat==='마법/기술서'?.006:.025;if(m.boss)p*=8;if(Math.random()<p)out.push([n,d.sub==='화살'?rnd(5,30):1]);}
   if(Math.random()<.06)out.push(['체력 회복제',1]);
   // 자동 획득: 드롭 아이템은 바닥에 떨어지지 않고 바로 인벤토리로
-  out.forEach(([n,q])=>{invAdd(n,q,0);addFloat(m.x,m.y,n==='아데나'?'+'+fmt(q):n,'#ffe08a',1);log((n==='아데나'?fmt(q)+' 아데나':itemName({n,q,e:0})+(q>1?' ('+q+')':''))+'을(를) 획득했습니다.','c-get');});
+  // 처치한 캐릭터에게 자동 루팅
+  if(killer!==P)return;
+  out.forEach(([n,q])=>{invAdd(n,q,0);addFloat(m.x,m.y,n==='아데나'?'+'+fmt(q):n,'#ffe08a',1);log('[자동 루팅] '+(n==='아데나'?fmt(q)+' 아데나':itemName({n,q,e:0})+(q>1?' ('+q+')':''))+'을(를) 획득했습니다.','c-get');});
   if(out.length){G.saveDirty=true;refreshUI();}}
 function gainExp(e){if(P.lv>=99)return;P.exp+=e;addFloat(P.x,P.y,'+'+e+' EXP','#e9d27a',1);
   while(P.exp>=expNeed(P.lv)){P.exp-=expNeed(P.lv);P.lv++;const C=calc();
