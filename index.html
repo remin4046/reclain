@@ -767,6 +767,7 @@ function calc(){
   const col={'한손검':'한손검','둔기':'도끼','창':'창','활':'활','지팡이':'지팡이','단검':'단검','양손검':'양손검'}[r.wsub]||'주먹';
   r.aspd=GD.speed[P.cls][col]||1000;r.mspd=(GD.speed[P.cls]['이동']||667)/2.5;
   if(b.haste>now){r.aspd*=0.75;r.mspd*=0.7;}
+  if(b.wafer>now)r.aspd*=0.75; // 엘븐 와퍼(요정 전용 공격속도 증가)
   return r;
 }
 
@@ -905,6 +906,7 @@ function useItem(it){const d=ITEM(it.n),n=it.n,C=calc();
   if(n==='마력 회복 물약'){P.mp=Math.min(P.mmp,P.mp+rnd(10,20));invRemove(n,1);refreshUI();return;}
   if(n==='속도향상 물약'||n==='강화 속도향상 물약'){G.buffs.haste=G.time+(n.startsWith('강화')?1800000:300000);invRemove(n,1);log('몸이 빨라졌습니다.','c-sys');addFx('heal',P.x,P.y,'#7fd');refreshUI();return;}
   if(n==='용기의 물약'){if(P.cls!=='knight'){log('기사만 사용할 수 있습니다.','c-bad');return;}G.buffs.haste=G.time+300000;invRemove(n,1);log('용기가 솟아납니다. (공격 속도 증가)','c-sys');refreshUI();return;}
+  if(n==='엘븐 와퍼'){if(P.cls!=='elf'){log('요정만 사용할 수 있습니다.','c-bad');return;}G.buffs.wafer=G.time+480000;G.waferNote=1;invRemove(n,1);log('엘븐 와퍼를 먹었습니다. 8분간 공격 속도가 빨라집니다.','c-sys');addFx('heal',P.x,P.y,'#9f9');G.saveDirty=true;refreshUI();return;}
   if(n==='귀환 주문서'){invRemove(n,1);addFx('tele',P.x,P.y);enterMap(0,32600,32936);refreshUI();return;}
   if(n==='순간이동 주문서'){const M=G.map;for(let k=0;k<200;k++){const x=rnd(M.ox,M.ox+M.W-1),y=rnd(M.oy,M.oy+M.H-1);if(M.walk(x,y)&&!M.npcs.some(q=>q.x===x&&q.y===y)){invRemove(n,1);addFx('tele',P.x,P.y);P.x=P.fx=x;P.y=P.fy=y;P.t=1;G.path=null;G.target=null;addFx('tele',x,y);pushPresence(true);refreshUI();return;}}return;}
   if(n==='무기 마법 주문서'||n==='갑옷 마법 주문서'){openEnchant(n);return;}
@@ -1533,7 +1535,8 @@ function loop(t){const dt=Math.min(100,t-lastT);lastT=t;
     updMons(dt);updPeers(dt);tickRegen(dt);const _l1=performance.now();render();const _l2=performance.now();warmStep();DIAG.add('logic',_l1-_l0);DIAG.add('render',_l2-_l1);DIAG.add('frame',dt);DIAG.n++;
     PERF.acc+=dt;PERF.n++;if(dt>PERF.worst)PERF.worst=dt;if(PERF.acc>=1000){PERF.fps=Math.round(PERF.n*1000/PERF.acc);PERF.hist.push(PERF.fps);if(PERF.hist.length>4)PERF.hist.shift();adaptQuality();$('#fps').textContent=PERF.fps+' FPS · '+QUALITY[PERF.q].name;showDiag();PERF.acc=0;PERF.n=0;PERF.worst=0;}
     saveT+=dt;if(saveT>20000){saveT=0;if(G.saveDirty)saveNow(true);}
-    if(G.time%1000<dt)pushPresence();}
+    if(G.time%1000<dt)pushPresence();
+    if(G.waferNote&&!(G.buffs.wafer>G.time)){G.waferNote=0;log("엘븐 와퍼의 효과가 사라졌습니다.","c-sys");}}
   requestAnimationFrame(loop);}
 async function boot(){loadExtSprites();cv=$('#cv');ctx=cv.getContext('2d',{alpha:false});resize();makeTex();setupInput();
   await Store.init();if(SESSION)onLogin();else showAuth();requestAnimationFrame(loop);}
