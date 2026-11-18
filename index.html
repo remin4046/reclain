@@ -361,15 +361,14 @@ function drawMon(c,arch,col,ph,dir){
 
 // ---------- caches ----------
 const SPR={};
-function charSprite(k,dir,f,L){const key=k+dir+f;if(SPR[key])return SPR[key];const cv=document.createElement('canvas');cv.width=192;cv.height=300;const c=cv.getContext('2d');c.scale(3,3);L=L||LOOKS[k];
+function charSprite(k,dir,f,L){const key=k+dir+f;if(SPR[key])return SPR[key];{const ext=!L&&extSprite(k,dir,f);if(ext)return SPR[key]=ext;}const cv=document.createElement('canvas');cv.width=192;cv.height=300;const c=cv.getContext('2d');c.scale(3,3);L=L||LOOKS[k];
   if(dir==='W'){c.translate(64,0);c.scale(-1,1);drawChar(c,L,'E',f);}else drawChar(c,L,dir,f);realismPass(cv);
-  const ext=extSprite(k,dir,f);if(ext)return SPR[key]=ext;
   const out=document.createElement('canvas');out.width=cv.width;out.height=cv.height;const o=out.getContext('2d');try{o.filter='drop-shadow(0 0 2px rgba(0,0,0,.6))';}catch(e){}o.drawImage(cv,0,0);o.filter='none';return SPR[key]=out;}
 // ---- 외부 이미지 스프라이트(선택): sprites/manifest.json 이 있으면 그 그림을 우선 사용 ----
 // 형식: {"eF":{"src":"sprites/eF.png","fw":192,"fh":300,"rows":["S","E","N"],"frames":5}, ...}  (W는 E를 좌우 반전)
 const EXT={};function extSprite(k,dir,f){const e=EXT[k];if(!e||!e.img)return null;const d=dir==='W'?'E':dir;const r=e.rows.indexOf(d);if(r<0)return null;
-  const cv=document.createElement('canvas');cv.width=192;cv.height=300;const c=cv.getContext('2d');if(dir==='W'){c.translate(192,0);c.scale(-1,1);}
-  c.drawImage(e.img,Math.min(f,e.frames-1)*e.fw,r*e.fh,e.fw,e.fh,0,0,192,300);return cv;}
+  const W2=Math.round(300*e.fw/e.fh);const cv=document.createElement('canvas');cv.width=W2;cv.height=300;const c=cv.getContext('2d');c.imageSmoothingQuality='high';if(dir==='W'){c.translate(W2,0);c.scale(-1,1);}
+  c.drawImage(e.img,Math.min(f,e.frames-1)*e.fw,r*e.fh,e.fw,e.fh,0,0,W2,300);cv.ext=true;return cv;}
 async function loadExtSprites(){try{const r=await fetch('sprites/manifest.json',{cache:'no-store'});if(!r.ok)return;const m=await r.json();
   await Promise.all(Object.entries(m).map(([k,e])=>new Promise(res=>{if(!LOOKS[k]||!e.src)return res();const im=new Image();im.onload=()=>{EXT[k]=Object.assign({rows:['S','E','N'],frames:5,fw:192,fh:300},e,{img:im});res();};im.onerror=res;im.src=e.src;})));
   for(const key in SPR)if(/^(kF|eF|wF|wM|pM|eM|pF|kM)/.test(key))delete SPR[key];}catch(e){}}
@@ -1104,11 +1103,12 @@ function drawPlayer(p,a,b,cx,cy,me,look,atkT,wn,ak,aim,acol){const[x0,y0]=iso(a,
   const drawW=()=>{ctx.save();ctx.translate(hx+Math.sin(ang)*thrust,hy-Math.cos(ang)*thrust);
     if(bowMode)drawBow(ctx,bowTh,bowPull,bowNock,L.bowCol);else drawWeapon(ctx,kind,ang,L.orb);ctx.restore();};
   const behind=dir==='N'||(bowMode&&k>=0&&Math.sin(bowTh)<-.35);
-  if(kind&&behind)drawW();
-  const csp=charSprite(look,dir,f);ctx.drawImage(csp,sx-32+ox,sy-97+oy,64,100);if(flash){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.45;ctx.drawImage(csp,sx-32+ox,sy-97+oy,64,100);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}
-  if(L.shield&&dir!=='N'&&(me?eqItem('shield'):p.sh)){ctx.save();const x=(dir==='E'?sx-12:dir==='W'?sx+2:sx-24)+ox;ctx.fillStyle=L.shield;rr(ctx,x,sy-50+oy,13,18,4);ctx.fill();ctx.strokeStyle='#e0c878';ctx.lineWidth=1.3;ctx.stroke();ctx.restore();}
-  if(trail)drawSlashTrail(hx,hy,trail[0],trail[1],trail[2],trail[3],trail[4]);
-  if(kind&&!behind)drawW();
+  if(kind&&behind&&!EXT[look])drawW();
+  const EX=EXT[look]&&EXT[look].img?EXT[look]:null;let ef=f,bob=0;if(EX){if(k>=0&&EX.attackFrame!=null)ef=EX.attackFrame;else if(walking&&(dir==='S'||dir==='N'))bob=-Math.abs(Math.sin(G.time/120*Math.PI/2))*2;}
+  const csp=charSprite(look,dir,EX?ef:f);const dw=100*csp.width/csp.height;ctx.drawImage(csp,sx-dw/2+ox,sy-97+oy+bob,dw,100);if(flash){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.45;ctx.drawImage(csp,sx-dw/2+ox,sy-97+oy+bob,dw,100);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}
+  if(!EXT[look]&&L.shield&&dir!=='N'&&(me?eqItem('shield'):p.sh)){ctx.save();const x=(dir==='E'?sx-12:dir==='W'?sx+2:sx-24)+ox;ctx.fillStyle=L.shield;rr(ctx,x,sy-50+oy,13,18,4);ctx.fill();ctx.strokeStyle='#e0c878';ctx.lineWidth=1.3;ctx.stroke();ctx.restore();}
+  if(trail&&!EXT[look])drawSlashTrail(hx,hy,trail[0],trail[1],trail[2],trail[3],trail[4]);
+  if(kind&&!behind&&!EXT[look])drawW();
   if(k>=0&&ak==='c')drawCastFx(sx,sy,k,col,tipX,tipY);
   ctx.restore();
   const nm=me?P.name:p.n;label(nm,sx,sy-104,me?'#9fe39a':'#9fd3ff');
@@ -1445,7 +1445,7 @@ function sendChat(){const inp=$('#chatin');const t=inp.value.trim();inp.value=''
   CHATQ.push(m);if(CHAN&&CHAN.state==='joined')flushChat();else{log('(연결 중… 연결되면 전송됩니다)','c-sys');reconnectRoom();}}
 
 // ---------- screens ----------
-function previewCanvas(look,w,h){const c=document.createElement('canvas');c.width=w*2;c.height=h*2;const x=c.getContext('2d');x.drawImage(charSprite(look,'S',0),0,0,w*2,h*2);return c;}
+function previewCanvas(look,w,h){const c=document.createElement('canvas');c.width=w*2;c.height=h*2;const x=c.getContext('2d');const sp=charSprite(look,'S',0),dw=h*2*sp.width/sp.height;x.drawImage(sp,(w*2-dw)/2,0,dw,h*2);return c;}
 async function showSelect(){$('#hud').classList.add('hidden');$('#screen').classList.remove('hidden');const box=$('#sbox');
   box.innerHTML='<div class="logo">리클라인</div><div class="sub">RECLAIN · 말하는 섬에서 시작되는 모험</div><div class="note" style="text-align:center;margin-bottom:10px">캐릭터 불러오는 중…</div>';
   let chars;try{chars=await Store.list();}catch(e){box.innerHTML='<div class="logo">리클라인</div><p style="text-align:center;color:#ff9a7a">캐릭터를 불러오지 못했습니다: '+esc(e.message||e)+'</p><p style="text-align:center"><button class="btn" onclick="showSelect()">다시 시도</button> <button class="btn" onclick="logout()">로그아웃</button></p>';return;}
