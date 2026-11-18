@@ -89,6 +89,11 @@ input.tx{background:#0d0a07;border:1px solid var(--line);color:var(--ink);paddin
 .it .q{color:#c9b88f}
 .r1{color:#ffffff}.r2{color:#8fd0ff}.r3{color:#f0c060}.r4{color:#ff8a8a}
 #chr{left:270px;top:10px;width:300px}
+#wmap{left:50%;top:50%;transform:translate(-50%,-50%);width:min(760px,94vw);max-height:92vh;background:linear-gradient(160deg,rgba(40,34,26,.97),rgba(18,15,11,.97))}
+#wmcv{display:block;width:100%;height:auto;background:#07090c;border:1px solid #5a4a30;border-radius:4px;cursor:crosshair}
+#wmap .leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:#cfc4a8;margin-top:6px}
+#wmap .leg i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+#wmap .bar2{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;color:#a99d80;margin-top:4px}
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:12.5px}
 .kv span:nth-child(odd){color:var(--gold)}
 #npc{left:50%;top:50%;transform:translate(-50%,-50%);width:min(620px,94vw)}
@@ -125,11 +130,16 @@ table.t th{color:var(--gold);position:sticky;top:0;background:#16110b}
   <div id="menu" class="panel">
     <button class="btn sm" data-w="inv">인벤토리 (I)</button>
     <button class="btn sm" data-w="chr">캐릭터 (C)</button>
+    <button class="btn sm" data-w="wmap">지도 (M)</button>
     <button class="btn sm" id="bsave">저장</button>
     <button class="btn sm" id="bexit">캐릭터 선택</button>
   </div>
   <div id="inv" class="win panel hidden"></div>
   <div id="chr" class="win panel hidden"></div>
+  <div id="wmap" class="win panel hidden"><h3><span id="wmt">지도</span><span class="x" id="wmx">닫기 ✕</span></h3>
+    <canvas id="wmcv" width="1440" height="820"></canvas>
+    <div class="bar2"><span id="wmpos">-</span><span>클릭: 자동 이동 · 휠: 확대/축소 · 드래그: 지도 이동 · <a href="#" id="wmme" style="color:#e9c56a">내 위치로</a></span></div>
+    <div class="leg"><span><i style="background:#fff"></i>나</span><span><i style="background:#6cf"></i>다른 플레이어</span><span><i style="background:#ffd65a"></i>NPC</span><span><i style="background:#c79bff"></i>포탈·입구</span><span><i style="background:#f55"></i>몬스터</span><span><i style="background:#7fe07f"></i>이동 경로</span></div></div>
   <div id="npc" class="win panel hidden"></div>
 </div>
 <div id="tip" class="panel hidden"></div>
@@ -1132,6 +1142,50 @@ function drawFx(cx,cy){const now=G.time;G.fx=G.fx.filter(f=>{const k=(now-f.t0)/
     else if(f.k==='tele'){ctx.fillStyle='rgba(180,220,255,'+(1-k)*.7+')';ctx.fillRect(sx-14,sy-90+k*30,28,100);}}
   return true;});}
 
+// ---------- world map (M) ----------
+// 현재 맵 전체를 게임 화면과 같은 쿼터뷰 방향(2:1 마름모)으로 그림
+const WV={z:1,px:0,py:0,id:null};
+function wmFit(M){if(M._wfit)return M._wfit;let u0=1e9,u1=-1e9,v0=1e9,v1=-1e9;// 깊은 바다를 제외한 땅 영역에 맞춤
+  for(let j=0;j<M.H;j+=2)for(let i=0;i<M.W;i+=2){if(M.t[j*M.W+i]===T.DEEP)continue;const u=i-j,v=i+j;if(u<u0)u0=u;if(u>u1)u1=u;if(v<v0)v0=v;if(v>v1)v1=v;}
+  if(u0>u1){u0=-M.H;u1=M.W;v0=0;v1=M.W+M.H;}u0-=6;u1+=6;v0-=6;v1+=6;
+  return M._wfit={u0,u1,v0,v1};}
+function wmXf(){const M=G.map,c=$('#wmcv'),pad=20;if(WV.id!==M.id){WV.id=M.id;WV.z=1;WV.px=0;WV.py=0;}
+  const F=wmFit(M),k0=Math.min((c.width-pad*2)/(F.u1-F.u0),(c.height-pad*2)*2/(F.v1-F.v0)),k=k0*WV.z;
+  const uc=(F.u0+F.u1)/2,vc=(F.v0+F.v1)/2,cx=c.width/2+WV.px,cy=c.height/2+WV.py;
+  return{k,f:(x,y)=>{x-=M.ox;y-=M.oy;return[cx+((x-y)-uc)*k,cy+((x+y)-vc)*k/2];},
+    inv:(sx,sy)=>{const u=(sx-cx)/k+uc,v=(sy-cy)*2/k+vc;return[Math.floor(M.ox+(u+v)/2),Math.floor(M.oy+(v-u)/2)];}};}
+function drawWorldMap(){const w=$('#wmap');if(!P||!G.map||w.classList.contains('hidden'))return;
+  const M=G.map,c=$('#wmcv'),x=c.getContext('2d'),T2=wmXf(),k=T2.k,S2=c.width/(c.clientWidth||c.width),kd=k/S2;$('#wmt').textContent='지도 — '+M.name;
+  if(!miniCv)buildMini();
+  x.setTransform(1,0,0,1,0,0);x.fillStyle=M.dark?'#050403':'#0b1a2c';x.fillRect(0,0,c.width,c.height);
+  const[o0,o1]=T2.f(M.ox,M.oy);x.save();x.setTransform(k,k/2,-k,k/2,o0,o1);x.imageSmoothingEnabled=false;x.drawImage(miniCv,0,0);x.restore();
+  const dot=(px,py,r,col,line)=>{const[a,b]=T2.f(px+.5,py+.5);x.beginPath();x.arc(a,b,r*S2,0,7);x.fillStyle=col;x.fill();if(line){x.lineWidth=line*S2;x.strokeStyle='rgba(0,0,0,.8)';x.stroke();}return[a,b];};
+  const txt=(t,a,b,col,sz,dy)=>{b-=(dy||0)*S2;x.font='bold '+(sz*S2)+'px "Noto Sans KR",sans-serif';x.textAlign='center';x.lineWidth=3*S2;x.strokeStyle='rgba(0,0,0,.85)';x.strokeText(t,a,b);x.fillStyle=col;x.fillText(t,a,b);};
+  if(G.path&&G.path.length){x.beginPath();let[a,b]=T2.f(P.x+.5,P.y+.5);x.moveTo(a,b);for(const[px,py]of G.path){[a,b]=T2.f(px+.5,py+.5);x.lineTo(a,b);}x.strokeStyle='#7fe07f';x.lineWidth=2*S2;x.setLineDash([6*S2,4*S2]);x.stroke();x.setLineDash([]);
+    const e=G.path[G.path.length-1];const[ea,eb]=T2.f(e[0]+.5,e[1]+.5);x.beginPath();x.arc(ea,eb,7*S2,0,7);x.stroke();}
+  for(const m of G.mons)if(!m.dead)dot(m.x,m.y,m.boss?4:2,'#f55');
+  for(const l of M.labels){const[a,b]=T2.f(l.x,l.y);txt(l.name,a,b,'#f3e2b0',kd>=4?15:13);}
+  for(const n of M.npcs){const[a,b]=dot(n.x,n.y,Math.min(5,Math.max(2.5,kd)),'#ffd65a',1);if(n.name&&kd>=4)txt(n.name,a,b,'#ffe9a0',11,7);}
+  for(const p of M.portals){const[a,b]=dot(p.x,p.y,5,'#c79bff',1.5);txt(p.name,a,b,'#e2cdff',12,9);}
+  for(const pe of G.peers.values())if(pe.m===M.id){const[a,b]=dot(pe.x,pe.y,4,'#6cf',1);if(pe.n)txt(pe.n,a,b,'#bfe6ff',11,8);}
+  const blink=.6+.4*Math.sin(performance.now()/180);const[pa,pb]=dot(P.x,P.y,7*blink+2,'rgba(255,255,255,.3)');dot(P.x,P.y,4.5,'#fff',1.5);txt(P.name,pa,pb,'#fff',13,10);
+  if(!$('#wmpos').dataset.hover)$('#wmpos').textContent='내 위치 '+P.x+', '+P.y;}
+function wmEvt(e){const c=$('#wmcv'),r=c.getBoundingClientRect();return wmXf().inv((e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height);}
+function initWorldMap(){const c=$('#wmcv');$('#wmx').onclick=()=>$('#wmap').classList.add('hidden');
+  c.addEventListener('mousemove',e=>{if(!G.map)return;const[tx,ty]=wmEvt(e);const M=G.map;$('#wmpos').dataset.hover=1;$('#wmpos').textContent='좌표 '+tx+', '+ty+(M.inb(tx,ty)&&!M.walk(tx,ty)?' (이동 불가)':'');});
+  c.addEventListener('mouseleave',()=>{delete $('#wmpos').dataset.hover;});
+  let drag=null;c.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,px:WV.px,py:WV.py,moved:false};});
+  addEventListener('pointerup',()=>{setTimeout(()=>drag=null,0);});
+  c.addEventListener('pointermove',e=>{if(!drag||!e.buttons)return;const r=c.getBoundingClientRect(),sc=c.width/r.width,dx=(e.clientX-drag.x)*sc,dy=(e.clientY-drag.y)*sc;if(Math.abs(dx)+Math.abs(dy)>8)drag.moved=true;if(drag.moved){WV.px=drag.px+dx;WV.py=drag.py+dy;drawWorldMap();}});
+  c.addEventListener('wheel',e=>{if(!G.map)return;e.preventDefault();const r=c.getBoundingClientRect(),sc=c.width/r.width,mx=(e.clientX-r.left)*sc-c.width/2,my=(e.clientY-r.top)*sc-c.height/2;
+    const z0=WV.z,z1=Math.max(1,Math.min(8,z0*(e.deltaY<0?1.25:0.8)));const f=z1/z0;WV.px=mx-(mx-WV.px)*f;WV.py=my-(my-WV.py)*f;WV.z=z1;if(z1===1){WV.px=0;WV.py=0;}drawWorldMap();},{passive:false});
+  $('#wmme').onclick=e=>{e.preventDefault();if(!P)return;if(WV.z<3)WV.z=3;WV.px=0;WV.py=0;const[a,b]=wmXf().f(P.x+.5,P.y+.5);WV.px=c.width/2-a;WV.py=c.height/2-b;drawWorldMap();};
+  c.addEventListener('click',e=>{if(drag&&drag.moved)return;if(!P||G.dead)return;const M=G.map;let[tx,ty]=wmEvt(e);if(!M.inb(tx,ty))return;
+    if(!M.walk(tx,ty)){const n=findNear(M,tx,ty);if(!n){log('그곳으로는 갈 수 없습니다.','c-bad');return;}[tx,ty]=n;}
+    G.target=null;G.npcGo=null;const p=findPath(P.x,P.y,tx,ty,200000);if(!p){log('그곳으로 가는 길을 찾을 수 없습니다.','c-bad');return;}
+    G.path=p;log('지도에서 선택한 위치('+tx+', '+ty+')로 이동합니다.','c-sys');drawWorldMap();});
+  setInterval(drawWorldMap,120);}
+
 // ---------- minimap ----------
 let miniCv=null;
 function buildMini(){const M=G.map;miniCv=document.createElement('canvas');miniCv.width=M.W;miniCv.height=M.H;const c=miniCv.getContext('2d');const img=c.createImageData(M.W,M.H);
@@ -1280,7 +1334,7 @@ let hotSig='';function renderHot(force){const sig=JSON.stringify(P.hot.map(h=>h&
   d.onclick=()=>useHot(i);d.oncontextmenu=e=>{e.preventDefault();P.hot[i]=null;renderHot(true);};d.title=h?'우클릭: 비우기':'인벤토리에서 아이템 우클릭 / 캐릭터 창에서 마법 등록';el.appendChild(d);});}
 function useHot(i){const h=P.hot[i];if(!h)return;if(h.startsWith('spell:')){castSpell(h.slice(6));return;}const it=P.inv.find(x=>x.n===h);if(!it){log(h+'이(가) 없습니다.','c-bad');return;}useItem(it);}
 function assignHot(v){let i=P.hot.indexOf(v);if(i>=0){toast('이미 '+(i+1)+'번에 등록됨');return;}i=P.hot.indexOf(null);if(i<0)i=5;P.hot[i]=v;G.saveDirty=true;renderHot(true);log(hotLabel(v)+' → 단축키 '+(i+1),'c-sys');}
-function toggleWin(id){const w=$('#'+id);w.classList.toggle('hidden');if(!w.classList.contains('hidden')){id==='inv'?renderInv():renderChr();}}
+function toggleWin(id){const w=$('#'+id);w.classList.toggle('hidden');if(!w.classList.contains('hidden')){id==='inv'?renderInv():id==='wmap'?drawWorldMap():renderChr();}}
 function itemTip(it){const d=ITEM(it.n),L=[];L.push('<b>'+esc(itemName(it))+'</b> <span class="note">'+esc(d.sub||d.cat||'')+'</span>');
   if(d.ds)L.push('타격치 '+d.ds+' / '+d.dl+(it.e?' (+'+it.e+')':''));if(d.ac!=null&&d.cat!=='무기')L.push('AC '+(d.ac+(d.cat==='방어구'?it.e||0:0)));
   if(d.opt)L.push(esc(d.opt));L.push('사용: '+(d.cls?esc(d.cls):'모든 클래스'));if(d.wt!=null)L.push('무게 '+d.wt+(d.mat?' · '+esc(d.mat):''));if(d.safe!=null)L.push('안전 인챈트 +'+d.safe);
@@ -1500,10 +1554,10 @@ function setupInput(){
   addEventListener('keydown',e=>{if(!P||$('#hud').classList.contains('hidden'))return;const typing=document.activeElement&&document.activeElement.tagName==='INPUT';
     if(typing){if(e.key==='Enter'&&document.activeElement.id==='chatin'){sendChat();}if(e.key==='Escape')document.activeElement.blur();return;}
     const k=e.key.length===1?e.key.toLowerCase():e.key;if(['w','a','s','d','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Alt'].includes(k)){G.keys[k]=true;e.preventDefault();}
-    if(k>='1'&&k<='6')useHot(+k-1);if(e.key==='F3'){e.preventDefault();DIAG.on=!DIAG.on;$('#diag').classList.toggle('hidden',!DIAG.on);}if(k==='i')toggleWin('inv');if(k==='c')toggleWin('chr');
+    if(k>='1'&&k<='6')useHot(+k-1);if(e.key==='F3'){e.preventDefault();DIAG.on=!DIAG.on;$('#diag').classList.toggle('hidden',!DIAG.on);}if(k==='i')toggleWin('inv');if(k==='c')toggleWin('chr');if(k==='m')toggleWin('wmap');
     if(k===' '){e.preventDefault();const m=nearestMon();if(m)G.target=m;}
     if(k==='Enter'){$('#chatin').focus();e.preventDefault();}
-    if(k==='Escape'){closeNpc();['inv','chr'].forEach(i=>$('#'+i).classList.add('hidden'));G.target=null;}});
+    if(k==='Escape'){closeNpc();['inv','chr','wmap'].forEach(i=>$('#'+i).classList.add('hidden'));G.target=null;}});
   addEventListener('keyup',e=>{const k=e.key.length===1?e.key.toLowerCase():e.key;G.keys[k]=false;});
   addEventListener('blur',()=>{G.keys={};});
   cv.addEventListener('mousemove',e=>{G.mouse=[e.clientX,e.clientY];if(P)G.hover=pickAt(e.clientX,e.clientY);});
@@ -1512,7 +1566,7 @@ function setupInput(){
     if(o&&o.hp!=null){G.target=o;G.path=null;return;}
     if(o&&o.role){const d=Math.max(Math.abs(o.x-P.x),Math.abs(o.y-P.y));if(d<=2){openNpc(o);return;}G.target=null;G.path=findPath(P.x,P.y,o.x,o.y,5000,1);G.npcGo=o;return;}
     G.target=null;G.npcGo=null;const[tx,ty]=worldAt(e.clientX,e.clientY);let p=findPath(P.x,P.y,tx,ty,5000);if(!p)p=findPath(P.x,P.y,tx,ty,3000,1);G.path=p;});
-  document.querySelectorAll('#menu [data-w]').forEach(b=>b.onclick=()=>toggleWin(b.dataset.w));
+  document.querySelectorAll('#menu [data-w]').forEach(b=>b.onclick=()=>toggleWin(b.dataset.w));initWorldMap();
   $('#bsave').onclick=()=>saveNow();$('#bexit').onclick=async()=>{await saveNow(true);P=null;closeNpc();renderOnline();showSelect();};
   $('#fps').style.cursor='pointer';$('#fps').title='클릭: 성능 진단';$('#fps').onclick=()=>{DIAG.on=!DIAG.on;$('#diag').classList.toggle('hidden',!DIAG.on);};const qs=$('#qsel');qs.value=PERF.auto?'a':String(PERF.q);qs.onchange=()=>{if(qs.value==='a')setQuality(1,true);else setQuality(+qs.value,false);qs.blur();};
   $('#brev').onclick=revive;addEventListener('resize',resize);
