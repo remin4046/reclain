@@ -475,10 +475,15 @@ function genIsland(){
   N('강화사 미르',32572,32931,'enchant','sage');
   N('군터',32523,32857,'talk','elder',{lines:['던전 입구는 내 집 서쪽에 있다네. 1층은 해골과 오크가, 2층 깊은 곳엔 바포메트가 도사리고 있지.','레벨 15 전에는 2층에 내려가지 말게.']});
   N('게렝',32569,33073,'talk','sage',{lines:['동쪽 숲에는 셸로브와 장로가 살아요. 마법을 쓰는 장로는 조심하세요.']});
-  N('마을 경비병',32584,32937,'talk','guard',{lines:['말하는 섬 마을에 온 것을 환영하오, 모험가여.','허수아비는 마을 북쪽에 있소. 무기를 시험해 보시오.','남쪽 선착장 근처에 커츠와 흑기사가 출몰한다는 소문이 있소. 각별히 주의하시오.']});
+  N('마을 경비병',32584,32937,'talk','guard',{lines:['말하는 섬 마을에 온 것을 환영하오, 모험가여.','마을 서쪽 허수아비 수련장에서 허수아비를 때리면 경험치를 얻을 수 있소. 레벨 10까지 수련해 보시오.','남쪽 선착장 근처에 커츠와 흑기사가 출몰한다는 소문이 있소. 각별히 주의하시오.']});
   N('선착장 뱃사공',32634,32976,'talk','guard',{lines:['글루딘 행 배가 운항 중이오. 바로 남쪽 부두의 보라색 표시로 가면 본토로 건너갈 수 있소.','본토에는 글루딘·기란·아덴 등 여러 마을이 있소. 지도(M)를 열어 보시오.']});
-  // scarecrow is a monster-like dummy
-  M.dummy=[32524,32823];
+  // scarecrow is a monster-like dummy (북쪽 1기 + 마을 서쪽(9시) 수련장)
+  M.dummies=[[32524,32823]];
+  {const TX1=32540,TX2=32555,TY1=32926,TY2=32946;
+    for(let Y=TY1;Y<=TY2;Y++)for(let X=TX1;X<=TX2;X++){const i=M.idx(X,Y);M.b[i]=0;M.o[i]=0;M.t[i]=(X===TX1||X===TX2||Y===TY1||Y===TY2)?T.STONE:(Y>=32934&&Y<=32938?T.ROAD:T.SAND);}
+    [32543,32546,32549,32552].forEach(x=>{M.dummies.push([x,32930],[x,32942]);});
+    N('수련 교관 바론',32553,32936,'talk','guard',{lines:['허수아비 수련장에 온 것을 환영하네! 허수아비를 공격하면 한 번 맞힐 때마다 경험치를 얻을 수 있지.','허수아비 수련은 레벨 10까지만 효과가 있네. 그 다음엔 섬 바깥의 진짜 몬스터와 싸워 보게.','이곳은 마을 안전지대라 몬스터가 들어오지 못하니 안심하고 수련하게.']});
+    M.labels.push({name:'허수아비 수련장',x:32547,y:32936});}
   // portals
   GD.portals.filter(p=>p.frm===0&&p.to===1).forEach(p=>M.portals.push({x:p.x,y:p.y,to:1,name:'말하는 섬 던전 1층'}));
   GD.portals.filter(p=>p.frm===0&&p.to===4).forEach(p=>M.portals.push({x:p.x,y:p.y,to:4,name:'본토(글루딘) 행 배',ax:32540,ay:32726}));
@@ -873,7 +878,7 @@ function calc(){
 }
 
 // ---------- monsters ----------
-const SAFE={x1:32556,x2:32666,y1:32916,y2:32958};
+const SAFE={x1:32539,x2:32666,y1:32916,y2:32958};
 function inSafe(x,y){if(!G.map)return false;if(G.map.safe)return G.map.safe.some(s=>x>=s.x1&&x<=s.x2&&y>=s.y1&&y<=s.y2);return G.map.id===0&&x>=SAFE.x1&&x<=SAFE.x2&&y>=SAFE.y1&&y<=SAFE.y2;}
 function findNear(M,x,y){for(let r=2;r<8;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(M.walk(x+dx,y+dy)&&!M.portals.some(p=>p.x===x+dx&&p.y===y+dy))return[x+dx,y+dy];}return[x,y];}
 function mstat(n){const m=GD.mons[n]||{lv:1};const lv=m.lv,boss=m.boss;
@@ -885,7 +890,7 @@ function spawnMon(sp){const st=mstat(sp.n);let x=sp.x,y=sp.y;const M=G.map;
   if(!ok)return null;
   return{n:sp.n,...st,hp:st.mhp,x,y,fx:x,fy:y,t:1,dir:'E',sp,next:G.time+Math.random()*2000,dead:false,hitT:-1e9,atkT:-1e9,attacked:false,atkT:0};}
 function loadMons(){G.mons=[];G.map.spawns.forEach(sp=>{const m=spawnMon(sp);if(m)G.mons.push(m);});
-  if(G.map.dummy){const[x,y]=G.map.dummy;G.mons.push({n:'허수아비',lv:1,mhp:99999,hp:99999,dmg:[0,0],ac:10,exp:1,aggro:false,ranged:0,spd:99999,aspd:99999,x,y,fx:x,fy:y,t:1,dir:'S',sp:{n:'허수아비',x,y,box:[x,y,x,y]},next:1e15,dead:false,hitT:-1e9,atkT:-1e9,dummy:true});}}
+  (G.map.dummies||[]).forEach(([x,y])=>{G.mons.push({n:'허수아비',lv:1,mhp:99999,hp:99999,dmg:[0,0],ac:10,exp:1,aggro:false,ranged:0,spd:99999,aspd:99999,x,y,fx:x,fy:y,t:1,dir:'S',sp:{n:'허수아비',x,y,box:[x,y,x,y]},next:1e15,dead:false,hitT:-1e9,atkT:-1e9,dummy:true});});}
 
 // ---------- map switching ----------
 function getMap(id){if(!G.maps[id])G.maps[id]=id===0?genIsland():id===4?genMainland():genDungeon(id);return G.maps[id];}
@@ -954,8 +959,11 @@ function meleeResolve(m,C,arrow){if(m.dead)return;const w=eqItem('weapon'),wd=w?
   if(G.buffs.bash){d=Math.round(d*1.8);G.buffs.bash=0;addFx('slash',m.x,m.y,'#ffd060');}
   d=Math.max(1,d);damageMon(m,d);}
 function damageMon(m,d,col,by){m.hp-=d;m.killer=by||P;m.hitT=G.time;m.attacked=true;addFloat(m.x,m.y,d,col||'#fff');
-  if(m.dummy){m.hp=m.mhp;return;}
+  if(m.dummy){m.hp=m.mhp;if((by||P)===P)dummyExp();return;}
   if(m.hp<=0)killMon(m,m.killer);}
+const DUMMY_MAXLV=10;
+function dummyExp(){if(P.lv>=DUMMY_MAXLV){if(!G.dummyWarn||G.time-G.dummyWarn>15000){G.dummyWarn=G.time;log('허수아비 수련은 레벨 '+DUMMY_MAXLV+'까지만 경험치를 얻을 수 있습니다. 이제 사냥터로 나가 보세요!','c-sys');}return;}
+  gainExp(Math.max(1,Math.ceil(expNeed(P.lv)/40)));}
 function killMon(m,killer){killer=killer||P;m.dead=true;m.respawn=G.time+(m.boss?300000:25000+Math.random()*15000);if(G.target===m)G.target=null;
   gainExp(m.exp);dropLoot(m,killer);if(m.boss)toast(m.n+' 처치!');}
 function dropLoot(m,killer){killer=killer||P;const list=GD.drops[m.n]||GD.drops[m.n.split(' (')[0]]||[];const out=[];
