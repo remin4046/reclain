@@ -28,6 +28,7 @@ button:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
 .pad button[aria-pressed="true"],.seg button[aria-pressed="true"]{background:var(--sel);border-color:var(--sel);color:#2a1f05}
 .pad .rot{font-size:12px}
 .seg{display:flex}
+input[type=range]{width:180px;accent-color:var(--sel)}
 .seg button{padding:7px 14px;border-radius:0}
 .seg button:first-child{border-radius:6px 0 0 6px}
 .seg button:last-child{border-radius:0 6px 6px 0}
@@ -42,9 +43,9 @@ button:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
 .sheet p{color:var(--sub);margin:0 0 14px;font-size:14px;max-width:70ch}
 .sheetwrap{overflow-x:auto}
 .sgrid{display:grid;grid-template-columns:44px auto;gap:0 10px;align-items:start;width:max-content}
-.cols{display:grid;grid-template-columns:repeat(8,128px);font-size:13px;color:var(--sub);text-align:center;grid-column:2}
+.cols{display:grid;grid-template-columns:repeat(20,128px);font-size:13px;color:var(--sub);text-align:center;grid-column:2}
 .rows{display:grid;grid-template-rows:repeat(8,128px);font-size:13px;color:var(--sub);align-items:center}
-#sheet{width:1024px;height:1024px;image-rendering:pixelated;background-color:#d8d8d8;background-image:linear-gradient(45deg,#bcbcbc 25%,transparent 25%,transparent 75%,#bcbcbc 75%),linear-gradient(45deg,#bcbcbc 25%,transparent 25%,transparent 75%,#bcbcbc 75%);background-size:16px 16px;background-position:0 0,8px 8px;border-radius:4px}
+#sheet{width:2560px;height:1024px;image-rendering:pixelated;background-color:#d8d8d8;background-image:linear-gradient(45deg,#bcbcbc 25%,transparent 25%,transparent 75%,#bcbcbc 75%),linear-gradient(45deg,#bcbcbc 25%,transparent 25%,transparent 75%,#bcbcbc 75%);background-size:16px 16px;background-position:0 0,8px 8px;border-radius:4px}
 @media (max-width:560px){h1{font-size:28px}}
 </style>
 <script src="characters.js"></script>
@@ -63,7 +64,11 @@ button:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
     </div>
   </div>
   <div class="grp"><span>동작</span>
-    <div class="seg" id="anim"><button data-v="idle" aria-pressed="true">대기</button><button data-v="walk" aria-pressed="false">걷기</button><button data-v="attack" aria-pressed="false">공격</button></div>
+    <div class="seg" id="anim"><button data-v="idle" aria-pressed="true">대기</button><button data-v="move" aria-pressed="false">이동</button><button data-v="attack" aria-pressed="false">공격</button><button data-v="buff" aria-pressed="false">버프 스킬</button><button data-v="skill" aria-pressed="false">공격 스킬</button></div>
+  </div>
+  <div class="grp"><span>이동 속도</span>
+    <input type="range" id="speed" min="20" max="260" step="10" value="80" aria-describedby="speedOut">
+    <output id="speedOut" style="font-size:13px;color:var(--sub)"></output>
   </div>
   <div class="grp"><span>크기</span>
     <div class="seg" id="zoom"><button data-v="3" aria-pressed="true">3배 확대</button><button data-v="1" aria-pressed="false">실제 64px</button></div>
@@ -74,35 +79,38 @@ button:focus-visible{outline:2px solid var(--sel);outline-offset:2px}
 
 <section class="sheet">
   <h2 id="sheetTitle">스프라이트 시트</h2>
-  <p>게임에 들어갈 실제 64px 원본을 2배로 키워 픽셀 그대로 보여줍니다. 열은 대기, 걷기 4프레임, 공격 3프레임, 행은 8방향입니다. 위 카드를 누르면 해당 캐릭터의 시트로 바뀝니다.</p>
+  <p>게임에 들어갈 실제 64px 원본을 2배로 키워 픽셀 그대로 보여줍니다. 열은 대기, 걷기 4, 달리기 4, 공격 3, 버프 스킬 4, 공격 스킬 4프레임, 행은 8방향입니다. 위 카드를 누르면 해당 캐릭터의 시트로 바뀝니다.</p>
   <div class="sheetwrap"><div class="sgrid">
     <div></div>
-    <div class="cols"><span>대기</span><span>걷기 1</span><span>걷기 2</span><span>걷기 3</span><span>걷기 4</span><span>공격 1</span><span>공격 2</span><span>공격 3</span></div>
+    <div class="cols"><span>대기</span><span>걷기 1</span><span>걷기 2</span><span>걷기 3</span><span>걷기 4</span><span>달리기 1</span><span>달리기 2</span><span>달리기 3</span><span>달리기 4</span><span>공격 1</span><span>공격 2</span><span>공격 3</span><span>버프 1</span><span>버프 2</span><span>버프 3</span><span>버프 4</span><span>스킬 1</span><span>스킬 2</span><span>스킬 3</span><span>스킬 4</span></div>
     <div class="rows"><span>남</span><span>남서</span><span>서</span><span>북서</span><span>북</span><span>북동</span><span>동</span><span>남동</span></div>
-    <canvas id="sheet" width="512" height="512" aria-label="선택한 캐릭터의 8방향 스프라이트 시트"></canvas>
+    <canvas id="sheet" width="1280" height="512" aria-label="선택한 캐릭터의 8방향 스프라이트 시트"></canvas>
   </div></div>
 </section>
 </main>
 
-<script>const {CLASSES,renderChar}=window.ReclainChars;
+<script>const {CLASSES,renderChar,MOTION,motionFor}=window.ReclainChars;
 /* ---------- 화면 ---------- */
-const state={ang:180,mode:'idle',zoom:3,frame:0,auto:false,sel:7,tick:0};
+const state={ang:180,mode:'idle',speed:80,zoom:3,frame:0,auto:false,sel:7,tick:0};
 const grid=document.getElementById('grid');const cards=[];
 CLASSES.forEach((c,i)=>{const b=document.createElement('button');b.className='card';b.setAttribute('aria-pressed',i===state.sel);
   b.innerHTML=`<canvas aria-label="${c.name} 캐릭터"></canvas><span><b>${c.name}</b><small>${c.desc}</small></span>`;
   b.addEventListener('click',()=>{state.sel=i;cards.forEach((x,j)=>x.btn.setAttribute('aria-pressed',j===i));drawSheet()});
   grid.appendChild(b);cards.push({btn:b,cv:b.querySelector('canvas')})});
 
+function curMotion(){return state.mode==='move'?motionFor(state.speed,false):state.mode==='idle'?motionFor(0,false):motionFor(0,state.mode)}
 function drawCards(){const dpr=window.devicePixelRatio||1,Z=state.zoom,size=76*3;
   cards.forEach((k,i)=>{const cv=k.cv;if(cv.width!==size*dpr){cv.width=size*dpr;cv.height=size*dpr}
     const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ground(ctx,size,size,3);
-    if(Z===3)renderChar(ctx,CLASSES[i],state.ang,state.frame,state.mode==='walk'?true:state.mode==='attack'?'attack':false,size/2,size-22,3);
-    else{const off=document.createElement('canvas');off.width=76;off.height=76;const o=off.getContext('2d');renderChar(o,CLASSES[i],state.ang,state.frame,state.mode==='walk'?true:state.mode==='attack'?'attack':false,38,68,1);
+    if(Z===3)renderChar(ctx,CLASSES[i],state.ang,state.frame,curMotion().mode,size/2,size-22,3);
+    else{const off=document.createElement('canvas');off.width=76;off.height=76;const o=off.getContext('2d');renderChar(o,CLASSES[i],state.ang,state.frame,curMotion().mode,38,68,1);
       ctx.imageSmoothingEnabled=false;ctx.drawImage(off,size/2-38,size-22-68)}})}
 const ORDER=[180,225,270,315,0,45,90,135];
+const SHEET_COLS=[[false,0],[true,0],[true,1],[true,2],[true,3],['run',0],['run',1],['run',2],['run',3],['attack',0],['attack',1],['attack',2],['buff',0],['buff',1],['buff',2],['buff',3],['skill',0],['skill',1],['skill',2],['skill',3]];
 function drawSheet(){const cv=document.getElementById('sheet'),ctx=cv.getContext('2d');ctx.clearRect(0,0,cv.width,cv.height);
-  ORDER.forEach((a,r)=>{for(let col=0;col<8;col++){ctx.save();ctx.beginPath();ctx.rect(col*64,r*64,64,64);ctx.clip();
-    renderChar(ctx,CLASSES[state.sel],a,col<5?Math.max(0,col-1):col-5,col===0?false:col<5?true:'attack',col*64+32,r*64+60,1);ctx.restore()}});
+  ORDER.forEach((a,r)=>{for(let col=0;col<20;col++){ctx.save();ctx.beginPath();ctx.rect(col*64,r*64,64,64);ctx.clip();
+    const [md,fr]=SHEET_COLS[col];
+    renderChar(ctx,CLASSES[state.sel],a,fr,md,col*64+32,r*64+60,1);ctx.restore()}});
   document.getElementById('sheetTitle').textContent=CLASSES[state.sel].name+' 스프라이트 시트'}
 
 const pad=document.getElementById('pad'),rot=document.getElementById('rot');
@@ -110,13 +118,17 @@ pad.querySelectorAll('button[data-a]').forEach(b=>b.addEventListener('click',()=
 rot.addEventListener('click',()=>{state.auto=!state.auto;rot.setAttribute('aria-pressed',state.auto);loop()});
 function syncPad(){pad.querySelectorAll('button[data-a]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.a===state.ang))}
 function seg(id,fn){const el=document.getElementById(id);el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{el.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));fn(b.dataset.v);drawCards();loop()}))}
-seg('anim',v=>{state.mode=v;state.frame=0});
+seg('anim',v=>{state.mode=v;state.frame=0;syncSpeed()});
+const spd=document.getElementById('speed'),spdOut=document.getElementById('speedOut');
+function syncSpeed(){spdOut.textContent=state.speed+' px/초, '+motionFor(state.speed,false).label+' (달리기 기준 '+MOTION.runSpeed+')'}
+spd.addEventListener('input',()=>{state.speed=+spd.value;if(state.mode!=='move'){state.mode='move';document.querySelectorAll('#anim button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==='move'))}state.frame%=4;syncSpeed();drawCards();loop()});
+syncSpeed();
 seg('zoom',v=>{state.zoom=+v});
 let timer=null;
 function loop(){clearTimeout(timer);if(state.mode==='idle'&&!state.auto)return;timer=setTimeout(()=>{state.tick++;
-  if(state.mode!=='idle')state.frame=(state.frame+1)%(state.mode==='attack'?3:4);
+  const mo=curMotion();if(state.mode!=='idle')state.frame=(state.frame+1)%mo.frames;
   if(state.auto&&state.tick%5===0){const i=ORDER.indexOf(state.ang);state.ang=ORDER[(i+1)%8];syncPad()}
-  drawCards();loop()},160)}
+  drawCards();loop()},state.mode==='idle'?160:curMotion().ms)}
 document.fonts&&document.fonts.ready.then(()=>{});
 drawCards();drawSheet();
 </script>
