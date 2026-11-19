@@ -556,6 +556,663 @@
    "scale": 1.3,
    "cols": 20,
    "rows": 8
+  },
+  "서큐버스": {
+   "file": "sprites/monsters/succubus.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "서큐버스 퀸": {
+   "file": "sprites/monsters/succubus_queen.png",
+   "cell": 136,
+   "footX": 68,
+   "footY": 117,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "비홀더": {
+   "file": "sprites/monsters/beholder.png",
+   "cell": 176,
+   "footX": 88,
+   "footY": 126,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "에틴": {
+   "file": "sprites/monsters/ettin.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 158,
+   "scale": 1.189,
+   "cols": 20,
+   "rows": 8
+  },
+  "해골저격병": {
+   "file": "sprites/monsters/skeleton_sniper.png",
+   "cell": 104,
+   "footX": 52,
+   "footY": 90,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "해골돌격병": {
+   "file": "sprites/monsters/skeleton_assault.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "해골근위병": {
+   "file": "sprites/monsters/skeleton_guard.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "아이들론": {
+   "file": "sprites/monsters/idolon.png",
+   "cell": 112,
+   "footX": 56,
+   "footY": 92,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "그렘린": {
+   "file": "sprites/monsters/gremlin.png",
+   "cell": 88,
+   "footX": 44,
+   "footY": 71,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "임프": {
+   "file": "sprites/monsters/imp.png",
+   "cell": 88,
+   "footX": 44,
+   "footY": 71,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "임프 장로": {
+   "file": "sprites/monsters/imp_elder.png",
+   "cell": 88,
+   "footX": 44,
+   "footY": 74,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "다크 엘프": {
+   "file": "sprites/monsters/dark_elf.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "아울베어": {
+   "file": "sprites/monsters/owlbear.png",
+   "cell": 184,
+   "footX": 92,
+   "footY": 151,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "오크 좀비": {
+   "file": "sprites/monsters/orc_zombie.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 118,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "홉고블린": {
+   "file": "sprites/monsters/hobgoblin.png",
+   "cell": 136,
+   "footX": 68,
+   "footY": 110,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "난쟁이족 전사": {
+   "file": "sprites/monsters/dwarf_warrior.png",
+   "cell": 120,
+   "footX": 60,
+   "footY": 93,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "사이클롭스": {
+   "file": "sprites/monsters/cyclops.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 158,
+   "scale": 1.156,
+   "cols": 20,
+   "rows": 8
+  },
+  "안타라스": {
+   "file": "sprites/monsters/antharas.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 125,
+   "scale": 0.612,
+   "cols": 20,
+   "rows": 8
+  },
+  "리자드맨": {
+   "file": "sprites/monsters/lizardman.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 120,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "데몬": {
+   "file": "sprites/monsters/demon.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 158,
+   "scale": 1.085,
+   "cols": 20,
+   "rows": 8
+  },
+  "그리폰": {
+   "file": "sprites/monsters/griffon.png",
+   "cell": 176,
+   "footX": 88,
+   "footY": 136,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "거대 여왕 개미": {
+   "file": "sprites/monsters/giant_queen_ant.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 126,
+   "scale": 1.156,
+   "cols": 20,
+   "rows": 8
+  },
+  "놀": {
+   "file": "sprites/monsters/gnoll.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 117,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "미믹": {
+   "file": "sprites/monsters/mimic.png",
+   "cell": 112,
+   "footX": 56,
+   "footY": 68,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "아이스 골렘": {
+   "file": "sprites/monsters/ice_golem.png",
+   "cell": 184,
+   "footX": 92,
+   "footY": 148,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "페이퍼 맨": {
+   "file": "sprites/monsters/paper_man.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "실루엣": {
+   "file": "sprites/monsters/silhouette.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "크로코다일": {
+   "file": "sprites/monsters/crocodile.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 123,
+   "scale": 1.166,
+   "cols": 20,
+   "rows": 8
+  },
+  "악어": {
+   "file": "sprites/monsters/alligator.png",
+   "cell": 176,
+   "footX": 88,
+   "footY": 113,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "리빙아머": {
+   "file": "sprites/monsters/living_armor.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "파푸리온": {
+   "file": "sprites/monsters/fafurion.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 126,
+   "scale": 0.612,
+   "cols": 20,
+   "rows": 8
+  },
+  "바쿡": {
+   "file": "sprites/monsters/bakuk.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 159,
+   "scale": 1.248,
+   "cols": 20,
+   "rows": 8
+  },
+  "시댄서": {
+   "file": "sprites/monsters/sea_dancer.png",
+   "cell": 104,
+   "footX": 52,
+   "footY": 72,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "크랩맨": {
+   "file": "sprites/monsters/crabman.png",
+   "cell": 152,
+   "footX": 76,
+   "footY": 98,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "랫맨": {
+   "file": "sprites/monsters/ratman.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 118,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "혈거인간": {
+   "file": "sprites/monsters/caveman.png",
+   "cell": 160,
+   "footX": 80,
+   "footY": 130,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "일렉카둠": {
+   "file": "sprites/monsters/elekkadum.png",
+   "cell": 88,
+   "footX": 44,
+   "footY": 68,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "머맨": {
+   "file": "sprites/monsters/merman.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 119,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "크러스트시안": {
+   "file": "sprites/monsters/crustacean.png",
+   "cell": 168,
+   "footX": 84,
+   "footY": 109,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "곰": {
+   "file": "sprites/monsters/bear.png",
+   "cell": 176,
+   "footX": 88,
+   "footY": 125,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "상어": {
+   "file": "sprites/monsters/shark.png",
+   "cell": 136,
+   "footX": 68,
+   "footY": 83,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "아스테": {
+   "file": "sprites/monsters/aste.png",
+   "cell": 120,
+   "footX": 60,
+   "footY": 102,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "터틀 드래곤": {
+   "file": "sprites/monsters/turtle_dragon.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 108,
+   "scale": 0.911,
+   "cols": 20,
+   "rows": 8
+  },
+  "사라만다": {
+   "file": "sprites/monsters/salamander.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 105,
+   "scale": 1.287,
+   "cols": 20,
+   "rows": 8
+  },
+  "라미아": {
+   "file": "sprites/monsters/lamia.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 119,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "데스": {
+   "file": "sprites/monsters/death.png",
+   "cell": 184,
+   "footX": 92,
+   "footY": 151,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "유령": {
+   "file": "sprites/monsters/ghost.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 118,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "라바 골렘": {
+   "file": "sprites/monsters/lava_golem.png",
+   "cell": 184,
+   "footX": 92,
+   "footY": 148,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "불타는 전사": {
+   "file": "sprites/monsters/burning_warrior.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "이프리트": {
+   "file": "sprites/monsters/ifrit.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 160,
+   "scale": 1.156,
+   "cols": 20,
+   "rows": 8
+  },
+  "혼 켈베로스": {
+   "file": "sprites/monsters/horn_cerberus.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 123,
+   "scale": 0.967,
+   "cols": 20,
+   "rows": 8
+  },
+  "피닉스": {
+   "file": "sprites/monsters/phoenix.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 166,
+   "scale": 1.254,
+   "cols": 20,
+   "rows": 8
+  },
+  "파이어 에그": {
+   "file": "sprites/monsters/fire_egg.png",
+   "cell": 80,
+   "footX": 40,
+   "footY": 47,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "폭탄 꽃": {
+   "file": "sprites/monsters/bomb_flower.png",
+   "cell": 72,
+   "footX": 36,
+   "footY": 46,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "불타는 궁수": {
+   "file": "sprites/monsters/burning_archer.png",
+   "cell": 104,
+   "footX": 52,
+   "footY": 90,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "드래곤 플라이": {
+   "file": "sprites/monsters/dragonfly.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 103,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "아시타지오": {
+   "file": "sprites/monsters/asitagio.png",
+   "cell": 168,
+   "footX": 84,
+   "footY": 145,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "발라카스": {
+   "file": "sprites/monsters/valakas.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 125,
+   "scale": 0.612,
+   "cols": 20,
+   "rows": 8
+  },
+  "눈사람": {
+   "file": "sprites/monsters/snowman.png",
+   "cell": 120,
+   "footX": 60,
+   "footY": 80,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "샤벨 타이거": {
+   "file": "sprites/monsters/sabre_tiger.png",
+   "cell": 168,
+   "footX": 84,
+   "footY": 121,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "좀비 엘모어 마법사": {
+   "file": "sprites/monsters/zombie_elmore_mage.png",
+   "cell": 128,
+   "footX": 64,
+   "footY": 106,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "에티": {
+   "file": "sprites/monsters/yeti.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 158,
+   "scale": 1.224,
+   "cols": 20,
+   "rows": 8
+  },
+  "좀비 엘모어 장군": {
+   "file": "sprites/monsters/zombie_elmore_general.png",
+   "cell": 168,
+   "footX": 84,
+   "footY": 138,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "아이언 골렘": {
+   "file": "sprites/monsters/iron_golem.png",
+   "cell": 184,
+   "footX": 92,
+   "footY": 150,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "좀비 엘모어 병사": {
+   "file": "sprites/monsters/zombie_elmore_soldier.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 120,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "아이스 맨": {
+   "file": "sprites/monsters/ice_man.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "얼음 여왕": {
+   "file": "sprites/monsters/ice_queen.png",
+   "cell": 136,
+   "footX": 68,
+   "footY": 117,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "흑기사 수색대": {
+   "file": "sprites/monsters/black_knight_scout.png",
+   "cell": 104,
+   "footX": 52,
+   "footY": 90,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "도펠갱어": {
+   "file": "sprites/monsters/doppelganger.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "도펠겡어 보스": {
+   "file": "sprites/monsters/doppelganger_boss.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 158,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "미노타우르스": {
+   "file": "sprites/monsters/minotaur.png",
+   "cell": 192,
+   "footX": 96,
+   "footY": 158,
+   "scale": 1.224,
+   "cols": 20,
+   "rows": 8
+  },
+  "산적": {
+   "file": "sprites/monsters/bandit.png",
+   "cell": 144,
+   "footX": 72,
+   "footY": 116,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
+  },
+  "산적 두목": {
+   "file": "sprites/monsters/bandit_chief.png",
+   "cell": 168,
+   "footX": 84,
+   "footY": 137,
+   "scale": 1.3,
+   "cols": 20,
+   "rows": 8
   }
  }
 }
