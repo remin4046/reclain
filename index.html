@@ -151,7 +151,7 @@ table.t th{color:var(--gold);position:sticky;top:0;background:#16110b}
   <div id="online" class="panel hidden"></div>
   <div id="diag" class="panel hidden" style="position:absolute;right:10px;top:360px;width:300px;padding:8px 10px;font-size:11.5px;line-height:1.55"></div>
   <div id="hot" class="panel"></div>
-  <div id="log" class="panel"><div id="logl"></div><input id="chatin" class="tx" placeholder="Enter로 채팅" maxlength="80"></div>
+  <div id="log" class="panel"><div id="logl"></div><input id="chatin" class="tx" placeholder="Enter로 채팅 · /도움말" maxlength="80"></div>
   <div id="menu" class="panel">
     <button class="btn sm" data-w="inv">인벤토리 (I)</button>
     <button class="btn sm" data-w="chr">캐릭터 (C)</button>
@@ -1803,7 +1803,30 @@ function updPeers(dt){for(const o of G.peers.values()){const k=Math.min(1,dt/120
 // 채팅: 연결이 잠깐 끊겨도 메시지를 잃지 않도록 대기열에 넣었다가 재접속 후 전송
 const CHATQ=[],SENT=new Set();
 function flushChat(){if(!CHAN||CHAN.state!=='joined')return;while(CHATQ.length){const m=CHATQ.shift();CHAN.send({type:'broadcast',event:'chat',payload:m}).then(r=>{if(r!=='ok'){CHATQ.unshift(m);reconnectRoom();}}).catch(()=>{CHATQ.unshift(m);reconnectRoom();});}}
+// ---------- 운영자 명령어 ----------
+const ADMINS=['remin4860'];
+const ITEM_ALIAS={'초록물약':'속도향상 물약','강화초록물약':'강화 속도향상 물약','빨간물약':'체력 회복제','주홍물약':'고급 체력 회복제','맑은물약':'강력 체력 회복제','파란물약':'마력 회복 물약','용기':'용기의 물약','와퍼':'엘븐 와퍼','귀환':'귀환 주문서','텔':'순간이동 주문서','순간이동':'순간이동 주문서','무기주문서':'무기 마법 주문서','갑옷주문서':'갑옷 마법 주문서','돈':'아데나'};
+const nz=s=>String(s).replace(/\s+/g,'').toLowerCase();
+function findItem(q){const k=nz(q),names=Object.keys(GD.items).concat('아데나');if(ITEM_ALIAS[k])return[ITEM_ALIAS[k]];
+  const ex=names.find(n=>nz(n)===k);if(ex)return[ex];return names.filter(n=>nz(n).includes(k));}
+function runCmd(t){const a=t.slice(1).trim().split(/\s+/);const cmd=a.shift()||'';
+  if(cmd==='아이템'&&a[0]==='생성'){a.shift();cmdItem(a);return;}if(cmd==='아이템생성'){cmdItem(a);return;}
+  if(cmd==='도움말'||cmd==='명령어'){log('명령어: /아이템 생성 [+강화] 이름 [수량]  예) /아이템 생성 초록물약 10 · /아이템 생성 +10 마나의 지팡이','c-sys');return;}
+  log('알 수 없는 명령어입니다: /'+cmd+'  (/도움말)','c-bad');}
+function cmdItem(a){if(!ADMINS.includes(USERNAME)){log('운영자만 사용할 수 있는 명령어입니다.','c-bad');return;}
+  if(!a.length){log('사용법: /아이템 생성 [+강화] 이름 [수량]  예) /아이템 생성 +10 마나의 지팡이','c-sys');return;}
+  let en=0,q=1;if(/^[+-]\d+$/.test(a[0]))en=parseInt(a.shift(),10);if(a.length>1&&/^\d+$/.test(a[a.length-1]))q=parseInt(a.pop(),10);
+  const name=a.join(' ');if(!name){log('아이템 이름을 입력하세요.','c-bad');return;}
+  const hit=findItem(name);if(!hit.length){log('「'+name+'」에 해당하는 아이템이 없습니다.','c-bad');return;}
+  if(hit.length>1){log('「'+name+'」에 맞는 아이템이 여러 개입니다: '+hit.slice(0,8).join(', ')+(hit.length>8?' 외 '+(hit.length-8)+'개':''),'c-sys');return;}
+  const n=hit[0],d=ITEM(n);
+  if(n==='아데나'){q=Math.min(q,100000000);P.gold+=q;log('[운영자] '+fmt(q)+' 아데나를 생성했습니다.','c-get');G.saveDirty=true;refreshUI();return;}
+  const canEn=d.cat==='무기'||d.cat==='방어구'||d.cat==='액세서리';if(en&&!canEn){log(n+'은(는) 강화할 수 없는 아이템이라 +'+en+'은(는) 무시합니다.','c-sys');en=0;}
+  en=Math.max(-7,Math.min(20,en));
+  if(isStack(n)){q=Math.max(1,Math.min(q,10000));invAdd(n,q,0);}else{q=Math.max(1,Math.min(q,20));for(let i=0;i<q;i++)P.inv.push({n,q:1,e:en,u:uid()});}
+  log('[운영자] '+itemName({n,e:en})+(q>1?' '+fmt(q)+'개':'')+'을(를) 생성했습니다.','c-get');addFx('heal',P.x,P.y,'rgba(255,220,120,');G.saveDirty=true;refreshUI();}
 function sendChat(){const inp=$('#chatin');const t=inp.value.trim();inp.value='';inp.blur();if(!t||!P)return;
+  if(t.startsWith('/')){runCmd(t);return;}
   const m={id:MY_NONCE+':'+Date.now().toString(36),u:SESSION?SESSION.user.id:'',n:P.name,t:t.slice(0,80)};SENT.add(m.id);log(P.name+': '+m.t,'c-chat');
   CHATQ.push(m);if(CHAN&&CHAN.state==='joined')flushChat();else{log('(연결 중… 연결되면 전송됩니다)','c-sys');reconnectRoom();}}
 
