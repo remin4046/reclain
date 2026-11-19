@@ -1,1 +1,1 @@
-{"eF":{"src":"sprites/eF.png","fw":150,"fh":150,"rows":["S","E","N"],"frames":6,"attackFrame":5}}
+{"eF":{"src":"sprites/Female_Elf.png","fw":64,"fh":64,"rows":["S","SW","W","NW","N","NE","E","SE"],"frames":5}}
