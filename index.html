@@ -6,6 +6,9 @@
 <title>리클라인 ONLINE</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="characters.js?v=20261119-skill"></script>
+<script src="sprites/monsters/hq/w1.js?v=20261119-hq"></script>
+<script src="sprites/monsters/hq/w2.js?v=20261119-hq"></script>
+<script src="sprites/monsters/hq/w3.js?v=20261119-hq"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -657,7 +660,7 @@ const MOTION={idle:{frames:1,ms:0},walk:{frames:4,ms:150},run:{frames:4,ms:105},
 const SHEET=['idle',0,'walk',0,'walk',1,'walk',2,'walk',3,'run',0,'run',1,'run',2,'run',3,'attack',0,'attack',1,'attack',2,'buff',0,'buff',1,'buff',2,'buff',3,'skill',0,'skill',1,'skill',2,'skill',3];
 const ROWS=[180,225,270,315,0,45,90,135];
 const PS={quad:1.35,bug:1.9,blob:1.7,bird:1.35,fish:1.4};
-const hx=h=>{h=String(h).replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return[n>>16&255,n>>8&255,n&255];};
+const hx=h=>{h=String(h);const m=h.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/);if(m)return[+m[1]|0,+m[2]|0,+m[3]|0];h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return[n>>16&255,n>>8&255,n&255];};
 const tone=(h,a)=>{const c=hx(h);return'rgb('+c.map(v=>Math.max(0,Math.min(255,Math.round(a>0?v+(255-v)*a:v*(1+a))))).join(',')+')';};
 const rgb=h=>hx(h).join(',');
 const nrm=(x,y,z)=>{const l=Math.hypot(x,y,z)||1;return[x/l,y/l,z/l];};
@@ -678,7 +681,7 @@ function render(ctx,s,ang,frame,mode,cx,cy,S,t){mode=mode===true?'walk':(mode||'
     spark:(p,r,c,a)=>FX.push({t:'s',p,r,c,a}),
     ring:(r,c,a)=>G0.push({r,c,a}),
     arc:(pts,c,w)=>FX.push({t:'a',pts,c,w})};
-  (PLANS[s.plan]||PLANS.biped)(B);
+  if(s.draw)s.draw(B,K);else(PLANS[s.plan]||PLANS.biped)(B);if(s.detail)s.detail(B,K);
   const P=p=>{let[lx,ly,lz]=p;if(st.pitch)lz+=ly*st.pitch;if(lz>st.lz)ly+=(lz-st.lz)*st.lean/30;const z=(lz+(lz>st.bz?st.bob:0))*k;lx*=k;ly*=k;const X=lx*rx+ly*fx,Y=lx*ry+ly*fy;return{x:cx+X*S,y:cy-(z*.92+Y*.45)*S,Y};};
   const c=ctx;c.save();c.lineCap='round';c.lineJoin='round';
   // 바닥 그림자·고리
@@ -775,6 +778,7 @@ PLANS.biped=function(B){const s=B.s,{mode,f,t}=B;s.hip=s.hip||24;const p=bipedPo
   // 머리
   const hd=[0,1+(s.headF||0),hz];if(s.heads===2){head(B,[-4.6*bw,hd[1],hz-1],hr,fw,sd,up);head(B,[4.6*bw,hd[1],hz],hr,fw,sd,up);}else head(B,hd,hr,fw,sd,up);
   // 이펙트
+  B.J={p,H,T,sh,hz,hd,hr,bw,fw,sd,up,sk,bc,ac};
   fxBiped(B,p,hd,hr);};
 function head(B,hd,r,fw,sd,up){const s=B.s,h=s.head||'plain',sk=s.skin||'#8a9a6a',ec=s.eye||'#ffdd55',eg=s.eyeGlow;
   const P=(x,y,z)=>[hd[0]+x*r,hd[1]+y*r,hd[2]+z*r];
@@ -1176,8 +1180,13 @@ Object.assign(SPEC,{
 function kOf(n){const s=SPEC[n];return(s.k||1)*(PS[s.plan]||1);}
 function cellOf(n){const s=SPEC[n],k=kOf(n),big=s.plan==='quad'||s.plan==='bug'?1.25:1;return Math.round(Math.min(160,Math.max(80,96*k*big))/8)*8;}
 function motionFor(speedPx,act){if(act)return{mode:act,...MOTION[act]};if(speedPx>=140)return{mode:'run',...MOTION.run};if(speedPx>1)return{mode:'walk',...MOTION.walk};return{mode:'idle',...MOTION.idle};}
-return{render,SPEC,MOTION,SHEET,ROWS,cellOf,kOf,motionFor};
+// ---------- 고품질 업그레이드(HQ) 등록: sprites/monsters/hq/*.js 가 window.MRHQ 에 [이름, {스펙 덮어쓰기, detail(B,K), draw(B,K)}] 를 넣음 ----------
+const K={tone,rgb,hx,nrm,add3,mid,disc,weapon,eyes,head,bipedPose,fxBiped,PLANS,PS};
+function hq(n,o){if(!SPEC[n])return;SPEC[n]={...SPEC[n],...o,hq:1};}
+function applyHQ(){const q=(typeof window!=='undefined'&&window.MRHQ)||[];for(const[n,o]of q)hq(n,o);}
+return{render,SPEC,MOTION,SHEET,ROWS,cellOf,kOf,motionFor,hq,applyHQ,K};
 })();
+MR.applyHQ();
 MR.SPEC['도펠겡어']=MR.SPEC['도펠갱어'];
 // 일반 몬스터 8방향 모션(MR): 프레임 캐시(최근 사용 순) + 프레임당 새로 그리는 수 제한
 const MRC=new Map(),MRH={};
