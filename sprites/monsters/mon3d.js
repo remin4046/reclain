@@ -133,6 +133,12 @@ function head(B,hd,r,fw,sd,up){const s=B.s,h=s.head||'plain',sk=s.skin||'#8a9a6a
   if(h==='helm'){B.ball(hd,r*1.05,s.helm||'#3a3d46');B.cap(P(-.6,.85,.05),P(.6,.85,.05),r*.22,'#08080a',{d:-.1});eyes(B,hd,fw,sd,r,s.eye||'#ff4030',eg||'255,80,40',0,.3);if(s.plume)B.cap(P(0,-.2,1),P(0,-1.4,.6),r*.35,s.plume,{w1:r*.15});return;}
   if(h==='hood'){B.ball(hd,r*1.12,s.hood||s.cloth||'#3a3a5a');B.ball(P(0,.48,-.12),r*.72,'#0a0810',{sy:.95,d:-.1});eyes(B,hd,fw,sd,r*.95,ec,eg||'255,230,140',-.1,.3);B.poly([P(-.7,-.3,.9),P(.7,-.3,.9),P(0,-1.2,1.9)],s.hood||s.cloth||'#3a3a5a',{grad:1,d:.1});if(s.beard)B.poly([P(-.5,.85,-.35),P(.5,.85,-.35),P(0,.95,-1.6)],s.beard,{grad:1,d:-.2});return;}
   B.ball(hd,r,sk);
+  if(h==='rabbit'){B.ball(hd,r,sk);for(const g of[-1,1]){const a=P(.35*g,-.1,.8),b=P(.5*g,-.35,2.3+(B.mode==='run'?-.3:0));B.cap(a,b,r*.42,sk,{w1:r*.3});B.cap(P(.35*g,.05,.95),P(.48*g,-.15,2.1),r*.18,s.earC||'#f0b0b8',{w1:r*.12,d:-.02});}
+    B.ball(P(0,.82,-.3),r*.35,tone(sk,.2),{sy:.75});B.ball(P(0,1,-.1),r*.12,'#e07080',{flat:1,d:-.06});B.cap(P(-.1,.95,-.55),P(.1,.95,-.55),r*.14,'#ffffff',{d:-.07});if(s.helm)B.ball(P(0,0,.38),r*1.05,s.helm,{sy:.68,d:-.03});eyes(B,hd,fw,sd,r,ec,eg,.1,.4);return;}
+  if(h==='raccoon'){B.ball(hd,r,sk);B.cap(P(0,.5,-.2),P(0,1.25,-.35),r*.5,tone(sk,.3),{w1:r*.3});B.ball(P(0,1.28,-.32),r*.16,'#141010',{d:-.05});for(const g of[-1,1]){B.ball(P(.36*g,.72,.1),r*.3,'#201818',{flat:1,sx:1.3,d:-.03});B.cap(P(.6*g,-.1,.6),P(.75*g,-.2,1.25),r*.36,sk,{w1:r*.1});}
+    if(s.bandana)B.ball(P(0,-.05,.4),r*1.04,s.bandana,{sy:.62,d:-.04});eyes(B,hd,fw,sd,r,ec,eg,.1,.36);return;}
+  if(h==='medusa'){B.ball(hd,r,sk);for(let i=0;i<9;i++){const a=i/9*Math.PI*2,w=Math.sin(B.t/250+i)*.35;const p0=P(Math.cos(a)*.75,Math.sin(a)*.6-.15,.55),p1=P(Math.cos(a)*1.5+w,Math.sin(a)*1.2-.4,.9+Math.cos(i)*.3),p2=P(Math.cos(a)*1.9-w,Math.sin(a)*1.5-.6,.4+w);B.cap(p0,p1,r*.22,s.hair||'#3a7a3a',{w1:r*.16});B.cap(p1,p2,r*.16,s.hair||'#3a7a3a',{w1:r*.1});B.ball(p2,r*.13,tone(s.hair||'#3a7a3a',.1));}
+    eyes(B,hd,fw,sd,r,ec,eg,0,.36);return;}
   if(h==='owl'){B.ball(P(0,0,-.05),r*1.05,sk,{sx:1.08,sy:.95});B.ball(P(0,.55,0),r*.62,s.face||tone(sk,.25),{flat:1,sx:1.4,d:-.04});for(const g of[-1,1]){B.ball(P(.36*g,.82,.12),r*.26,'#f8e8a0',{flat:1,d:-.06,glow:eg});B.ball(P(.36*g,.9,.12),r*.11,'#100',{flat:1,d:-.08});B.cap(P(.6*g,-.1,.8),P(.8*g,-.3,1.5),r*.3,sk,{w1:r*.05});}B.cap(P(0,.95,-.05),P(0,1.35,-.4),r*.25,'#d0b060',{w1:r*.05,d:-.1});return;}
   if(h==='orc'||h==='brute'||h==='goblin'||h==='kobold'||h==='plain'||h==='zombie'||h==='fish'||h==='harpy'||h==='elf'||h==='cyclops'){
     const ear=h==='goblin'?1.4:h==='orc'?1:h==='kobold'?.9:h==='brute'||h==='cyclops'?.6:h==='elf'?1.5:0;
@@ -206,6 +212,7 @@ PLANS.quad=function(B){const s=B.s,{mode,f,t}=B,run=mode==='run',walk=mode==='wa
     if(jaw>.5)B.glow(add3(tip,[0,0,-r*.3]),2.2,s.fx||'255,200,120',.5);
     if(s.tusks)for(const g of[-1,1])B.cap(add3(add3(tip,[g*r*.4,0,-r*.3]),fwd,-r*.5),add3(add3(tip,[g*r*.6,0,r*.4]),fwd,-r*.1),r*.18,'#efe6cc',{w1:r*.07,d:-.06});
     if(s.ears==='round')for(const g of[-1,1])B.ball(add3(hd,[g*r*.65,-r*.2,r*.75]),r*.38,s.earC||sk,{d:.05});else if(s.ears)for(const g of[-1,1])B.cap(add3(hd,[g*r*.55,-r*.2,r*.6]),add3(hd,[g*r*.7,-r*.5,r*(s.ears==='flop'?.2:1.5)]),r*.4,s.earC||sk,{w1:r*.08});
+    if(s.horn1)B.cap(add3(add3(hd,fwd,r*.5),[0,0,r*.7]),add3(add3(hd,fwd,r*1.3),[0,0,r*2.4]),r*.3,s.horn1,{w1:r*.04,d:-.1});
     if(s.horns)for(const g of[-1,1])B.cap(add3(hd,[g*r*.4,-r*.3,r*.6]),add3(hd,[g*r*.9,-r*1.6,r*1.4]),r*.3,s.horns,{w1:r*.06});
     if(s.comb)B.poly([add3(hd,[0,r*.3,r*.8]),add3(hd,[0,-r*.2,r*1.7]),add3(hd,[0,-r*.9,r*.9])],s.comb,{grad:1});
     for(const g of[-1,1]){const e=add3(add3(add3(hd,fwd,r*.62),[Math.cos(ang2)*g*r*.52,0,0]),[0,0,r*.28]);B.ball(e,r*.2,s.eye||'#ffcc33',{flat:1,glow:s.eyeGlow,d:-.05});}}
@@ -236,6 +243,8 @@ PLANS.bug=function(B){const s=B.s,{mode,f,t}=B,run=mode==='run',walk=mode==='wal
   if(s.stinger){let a=add3([0,segs[0][1],h+segs[0][2]],[0,-segs[0][3]*bw*.8,0]);const n=5;for(let i=1;i<=n;i++){const th=i/n*Math.PI*(.75+sting*.3);const b=[0,segs[0][1]-Math.sin(th)*9*bw+ (i===n?sting*4:0),h+segs[0][2]+(1-Math.cos(th))*7*bw];B.cap(a,b,2*bw*(1-i*.1),sk,{w1:1.8*bw*(1-i*.12)});a=b;}B.cap(a,add3(a,[0,2.5+sting,-1.5]),1.4,'#2a1a10',{w1:.2});if(mode==='skill'&&f===2)B.glow(a,4,s.fx||'160,255,120',.9);}
   if(s.fingers){for(let i=0;i<4;i++)B.cap([-3+i*2,hd[1]+hr*.6,h],[-4+i*2.6,hd[1]+hr*.6+6+(walk?Math.sin(ph+i)*1.5:0),.6],1.3,sk,{w1:.9});}
   for(let i=0;i<(s.eyeN||2);i++){const g=s.eyeN>2?(i-(s.eyeN-1)/2)*.35:(i?1:-1)*.4;B.ball(add3(hp,[g*hr,hr*.82,hr*.32+(s.eyeN>2&&i%2?hr*.2:0)]),hr*.16,s.eye||'#ff3020',{flat:1,glow:s.eyeGlow,d:-.05});}
+  if(s.sting){const a=[0,segs[0][1]-segs[0][3]*bw*.8,h+segs[0][2]],b=add3(a,[0,-3-(mode==='attack'||mode==='skill'?2:0),-1.5]);B.cap(a,b,1.2,'#1a1a1a',{w1:.15});if(mode==='skill'&&f===2)B.glow(b,3.5,s.fx||'200,255,90',.9);}
+  if(s.stripes)for(let i=0;i<3;i++)B.ball([0,segs[0][1]-segs[0][3]*.5+i*segs[0][3]*.45*bw,h+segs[0][2]+segs[0][3]*bw*.55],segs[0][3]*bw*.72,s.stripes,{flat:1,sx:1,sy:.25,d:-.1});
   if(s.marks)B.ball([0,segs[0][1],h+segs[0][2]+segs[0][3]*bw*.75],segs[0][3]*bw*.45,s.marks,{flat:1,sy:.5,d:-.1,alpha:.85});
   const c=s.fx||'200,255,140';if(mode==='buff'){const kk=(f%4)/4;B.ring(8+kk*14,c,(1-kk)*.7);}if(mode==='skill'&&f===2&&!s.stinger)B.spark([0,hd[1]+lunge+10,h+3],8,c,.85);if(mode==='attack'&&f===1)B.glow([0,hd[1]+lunge+hr+3,h+1],4,c,.6);};
 
@@ -271,6 +280,12 @@ PLANS.blob=function(B){const s=B.s,{mode,f,t}=B,run=mode==='run',walk=mode==='wa
     for(const g of[-1,1]){B.ball(add3(hz2,[g*R0*.18,R0*.42,R0*.08]),R0*.07,'#141414',{flat:1,d:-.05});B.cap([g*R0*.6,lunge,z0+R0*2.3],[g*R0*1.5,lunge+(mode==='attack'&&f===1?R0:0),z0+R0*2.8+(mode==='buff'?R0*.6:0)],.9,'#5a3a1a');}
     B.cap(add3(hz2,[0,R0*.45,0]),add3(hz2,[0,R0*1.05,-.3]),R0*.14,'#f07a20',{w1:.2,d:-.06});B.cap(add3(hz2,[-R0*.48,0,R0*.32]),add3(hz2,[R0*.48,0,R0*.32]),R0*.22,s.hat||'#c03030',{d:-.02});for(let i=0;i<3;i++)B.ball([0,lunge+R0*.7,z0+R0*(1.7+i*.3)],R0*.06,'#141414',{flat:1,d:-.04});
     if(mode==='skill'&&f===2)for(let i=1;i<5;i++)B.glow([0,lunge+R0+i*4,z0+R0*2.4],1.6+i*.5,s.fx||'200,230,255',.8);}
+  else if(s.kind==='sword'){const sp=mode==='attack'?[-.6,1.2,.4][f]:mode==='skill'?[0,2,4,6][f]:mode==='buff'?f*1.5:Math.sin(t/400)*.15,c0=[0,lunge,z0+r*1.4],d=[Math.sin(sp)*.9,Math.sin(sp)*.3+(mode==='attack'?.5:0),Math.cos(sp)];
+    const tip=add3(c0,d,r*1.6),hilt=add3(c0,d,-r*.5),gd=add3(c0,d,-r*.25);B.cap(gd,tip,r*.28,s.blade||'#d8e0e8',{w1:r*.05});B.cap(add3(gd,[1,0,0],-r*.5),add3(gd,[1,0,0],r*.5),r*.14,s.guard||'#c0a040');B.cap(hilt,gd,r*.12,'#3a2a1a');B.ball(hilt,r*.12,s.guard||'#c0a040',{glow:s.fx});
+    if(mode==='attack'&&f===1)B.arc([add3(c0,[0,0,r*1.6]),add3(c0,[0,r*1.8,0]),add3(c0,[0,0,-r*1])],s.fx||'200,220,255',1.4);if(mode==='skill')B.glow(tip,3+f,s.fx||'200,220,255',.8);}
+  else if(s.kind==='skull'){const c0=[0,lunge,z0+r*1.3];for(let i=0;i<5;i++){const ph2=((t/600)+i/5)%1;B.glow(add3(c0,[Math.sin(i*2)*r*.5,-r*.3,r*.4+ph2*r*1.6]),r*.5*(1-ph2),s.fx||'255,120,40',(1-ph2)*.8);}
+    B.ball(c0,r*(1+pulse),s.bone||'#e8e2d0');B.ball(add3(c0,[0,r*.5,-r*.55]),r*.55,tone(s.bone||'#e8e2d0',-.1),{sy:.7});for(const g of[-1,1])B.ball(add3(c0,[g*r*.36,r*.78,r*.08]),r*.24,'#1a1210',{flat:1,glow:s.fx,d:-.05});
+    if(mode==='skill'&&f>=2)for(let i=1;i<5;i++)B.glow(add3(c0,[0,r+i*3.5,-i*.6]),1.6+i*.6,s.fx||'255,120,40',.85);}
   else if(s.kind==='eye'){B.ball([0,lunge,z0+r],r*(1+pulse)*sq,sk,{d:.1});const fw=[0,1,0];B.ball([0,lunge+r*.7,z0+r*1.05],r*.62,'#f4efe6',{d:-.02,sy:.95});B.ball([0,lunge+r*.92,z0+r*1.05],r*.32,s.iris||'#c02020',{glow:mode==='skill'?s.fx:null,d:-.06});B.ball([0,lunge+r*.98,z0+r*1.05],r*.14,'#100',{flat:1,d:-.08});
     for(let i=0;i<5;i++){const a=i/5*Math.PI*2+t/900;B.cap([Math.cos(a)*r*.5,lunge+Math.sin(a)*r*.5-r*.2,z0+r*.3],[Math.cos(a)*r*.9,lunge+Math.sin(a)*r*.9-r*.6,z0-r*.3+Math.sin(t/300+i)*1.5],1.4,tone(sk,-.15),{w1:.4,d:.2});}
     if(mode==='skill'&&f>=2)for(let i=1;i<5;i++)B.glow([0,lunge+r+i*4,z0+r],1.6+i*.4,s.fx||'255,80,80',.8);}
@@ -297,7 +312,7 @@ PLANS.bird=function(B){const s=B.s,{mode,f,t}=B,run=mode==='run',walk=mode==='wa
   for(const g of[-1,1])B.poly([[g*5,2,h+8],[g*(12+wing*.4),-2,h+12+wing],[g*(14+wing*.4),-8,h+6+wing*.6],[g*6,-6,h+4]],s.wings||tone(sk,-.15),{grad:1,d:.3});
   let a=[0,-5,h+4];for(let i=1;i<=4;i++){const b=[Math.sin(t/300+i)*1.2,-5-i*3.5,h+4-i*1.5+i*i*.25];B.cap(a,b,2.6-i*.4,s.tailc||'#5a8a3a',{w1:2.2-i*.4});a=b;}
   const neck=[0,4+peck*2,h+9-peck*2+up*2],hd=[0,7+peck*5,h+14-peck*5+up*3];B.cap([0,3,h+7],neck,3.2,sk);B.cap(neck,hd,2.8,sk);B.ball(hd,3.4,sk);
-  B.cap(add3(hd,[0,2.4,-.2]),add3(hd,[0,5.4,-1-peck]),1.6,'#e0b040',{w1:.3});B.poly([add3(hd,[0,0,2.8]),add3(hd,[0,-2.5,4.8]),add3(hd,[0,-3.5,1.2]),add3(hd,[0,1.8,2])],s.comb||'#d02020',{grad:1});
+  B.cap(add3(hd,[0,2.4,-.2]),add3(hd,[0,s.beakL||5.4,-1-peck]),s.beakW||1.6,s.beakC||'#e0b040',{w1:.3});if(s.pouch)B.ball(add3(hd,[0,(s.beakL||5.4)*.6,-2.2-peck]),1.8,s.pouch,{sy:.7,d:-.05});B.poly([add3(hd,[0,0,2.8]),add3(hd,[0,-2.5,4.8]),add3(hd,[0,-3.5,1.2]),add3(hd,[0,1.8,2])],s.comb||'#d02020',{grad:1});
   B.cap(add3(hd,[0,2.2,-2]),add3(hd,[0,2.6,-4]),1.4,s.comb||'#d02020',{w1:.6});for(const g of[-1,1])B.ball(add3(hd,[g*1.9,1.4,.8]),.65,s.eye||'#ffdd30',{flat:1,glow:s.eyeGlow,d:-.05});
   const c=s.fx||'200,255,120';if(mode==='buff'){const kk=(f%4)/4;B.ring(8+kk*14,c,(1-kk)*.7);}if(mode==='skill'&&f>=2)for(let i=1;i<5;i++)B.glow(add3(hd,[0,4+i*3.5,-1-i*.6]),1.6+i*.6,c,.8-i*.1);if(mode==='attack'&&f===1)B.spark(add3(hd,[0,6,-2]),4,c,.7);};
 
@@ -435,6 +450,78 @@ const SPEC={
  '산적':{plan:'biped',head:'plain',skin:'#d0a080',cloth:'#6a5a3a',pants:'#4a3a2a',hair:'#3a2a1a',helm:'#7a2a2a',belt:'#3a2410',weapon:'sword',fx:'255,220,160'},
  '산적 두목':{plan:'biped',head:'plain',k:1.2,skin:'#c89070',armor:'#5a4a3a',pants:'#3a2a1e',hair:'#1a1410',beard:'#2a1a10',cape:'#6a1a1a',belt:'#3a2410',pads:'#6a5a4a',weapon:'axe',bulk:1.2,fx:'255,190,120'},
 };
+// ---- 3차 추가: 변종은 기본 몬스터를 바탕으로 색·기운만 바꿈 ----
+{const V=(b,o)=>({...SPEC[b],...o});
+const HORSE={plan:'quad',k:1.5,h:15,len:13,bodyR:5.8,legW:3,snout:1.9,neckL:4,headZ:5,ears:1,tail:1,tailN:4,tailDrop:.35,tailW:2.2};
+const ELEM={plan:'biped',float:1,k:1.45,weapon:'claws',claws:1,bulk:1.3,neck:2};
+Object.assign(SPEC,{
+ '나이트메어':{...HORSE,skin:'#1a1418',mane:'#5a1a1a',tailc:'#5a1a1a',eye:'#ff4020',eyeGlow:'255,70,30',fx:'255,80,40'},
+ '공포의 나이트메어':{...HORSE,k:1.75,skin:'#120a10',mane:'#a02010',tailc:'#a02010',horns:'#3a2a2a',eye:'#ff3010',eyeGlow:'255,50,20',breath:1,fx:'255,60,20'},
+ '유니콘':{...HORSE,skin:'#f4f4f8',mane:'#c0d8ff',tailc:'#c0d8ff',horn1:'#f0d070',eye:'#4060a0',fx:'200,220,255'},
+ '다이어울프':V('늑대',{k:1.45,skin:'#4a4a52',chest:'#6a6a72',mane:'#3a3a40',eye:'#ffcc20',eyeGlow:'255,200,40',fx:'255,200,120'}),
+ '키메라':{plan:'quad',k:1.7,skin:'#b08040',chest:'#d0a060',mane:'#7a4a20',heads:2,horns:'#e0d0b0',wings:'#7a5a30',tail:1,tailN:5,tailc:'#4a7a3a',ears:1,eye:'#ffd030',eyeGlow:'255,200,40',breath:1,fx:'255,140,60'},
+ '댄싱 소드':{plan:'blob',kind:'sword',float:1,k:1.2,r:10,blade:'#dfe8f0',guard:'#c0a040',fx:'180,210,255'},
+ '레서 데몬':V('데몬',{k:1.25,skin:'#6a2a2a',wings:'#4a1a1a',weapon:'claws',claws:1,aura:null}),
+ '메두사':{plan:'biped',head:'medusa',serpent:1,skin:'#9ab080',hair:'#3a6a2a',cloth:'#4a3a2a',armor:'#5a6a3a',tailc:'#5a7a3a',weapon:'bow',trim:'#c0a040',eye:'#ffe040',eyeGlow:'255,230,60',fx:'230,255,120',caster:1},
+ '린드비오르':V('안타라스',{skin:'#3a7a5a',chest:'#a0d0b0',wings:'#2a5a4a',spines:'#c0f0d0',horns:'#e0f0e8',eye:'#e0ffe0',eyeGlow:'180,255,200',fx:'160,255,200'}),
+ '얼음 여왕의 시녀':V('얼음 여왕',{k:1,crown:null,cape:null,weapon:'spear',caster:0,aura:null}),
+ '변종 웅골리언트':V('웅골리언트',{skin:'#2a1a0a',abd:'#3a2410',marks:'#e06010',eye:'#ff8020',eyeGlow:'255,120,30',fx:'255,140,60'}),
+ '변종 라미아':V('라미아',{skin:'#a8b0c8',hair:'#5a2a6a',cloth:'#4a2a5a',armor:'#4a2a5a',tailc:'#6a3a7a',eye:'#ff60ff',eyeGlow:'255,90,255',fx:'240,120,255'}),
+ '사악한 비홀더':V('비홀더',{k:1.3,skin:'#4a2a3a',iris:'#ff2020',fx:'255,60,60'}),
+ '사악한 미믹':V('미믹',{wood:'#4a2a3a',band:'#8a2020',eye:'#ff3030',eyeGlow:'255,50,50',fx:'255,60,60'}),
+ '공포의 켈베로스':V('켈베로스',{k:1.6,skin:'#1a0a0a',mane:'#ff3010',horns:'#3a2020',fx:'255,60,20'}),
+ '공포의 파이어 에그':V('파이어 에그',{k:1,skin:'#3a0a0a',fx:'255,60,20'}),
+ '공포의 이프리트':V('이프리트',{k:1.85,skin:'#8a1a0a',cloth:'#ff3010',armor:'#6a0a04',fx:'255,60,20',aura:'255,60,20'}),
+ '난폭한 스파토이':V('스파토이',{crest:'#ff4010',eyeGlow:'255,60,30',fx:'255,90,50',aura:'255,60,30'}),
+ '난폭한 해골돌격병':V('해골돌격병',{eyeGlow:'255,60,30',fx:'255,90,50',aura:'255,60,30'}),
+ '난폭한 해골도끼병':V('해골도끼병',{eyeGlow:'255,60,30',fx:'255,90,50',aura:'255,60,30'}),
+ '난폭한 해골저격병':V('해골저격병',{eyeGlow:'255,60,30',fx:'255,90,50',aura:'255,60,30'}),
+ '난폭한 해골창병':V('해골창병',{eyeGlow:'255,60,30',fx:'255,90,50',aura:'255,60,30'}),
+ '난폭한 구울':V('구울',{skin:'#a08890',eye:'#ff2020',fx:'255,60,60',aura:'255,60,60'}),
+ '제니스 퀸':{plan:'bug',k:1.8,skin:'#3a1a3a',abd:'#5a2a5a',legs:8,spread:13,knee:8,segs:[[0,-8,3.5,7.5],[0,1,2.4,4]],eyeN:6,eye:'#ffd030',eyeGlow:'255,210,60',marks:'#e0b040',bwings:1,wingL:16,wingC:'#e0c0ff',fx:'230,150,255'},
+ '시어':V('비홀더',{k:1.8,skin:'#2a3a5a',iris:'#80c0ff',fx:'130,200,255'}),
+ '좀비 로드':V('좀비 엘모어 장군',{k:1.45,crown:'#c0a040',helm:'#8a7a40',cape:'#3a1a3a',weapon:'scythe',aura:'170,255,90'}),
+ '뱀파이어':{plan:'biped',head:'elf',skin:'#d8d0d8',hair:'#1a1018',cloth:'#2a0a14',armor:'#2a0a14',pants:'#1a0a10',cape:'#7a0a1a',trim:'#c0a040',weapon:'claws',claws:1,eye:'#ff2030',eyeGlow:'255,40,60',fx:'255,40,70'},
+ '와일드 베놈':{plan:'quad',k:1.35,skin:'#4a6a2a',chest:'#a0c040',h:6,len:15,wideLegs:1.5,legW:2.8,bodyR:4.8,snout:1.5,spines:'#c0e040',tail:1,tailN:5,tailUp:.2,eye:'#e0ff40',eyeGlow:'200,255,60',breath:1,fx:'180,255,60'},
+ '와일드 팡':V('늑대',{k:1.3,skin:'#7a5a3a',chest:'#a07a50',mane:'#5a3a20',sabers:1,eye:'#ffcc40',fx:'255,200,120'}),
+ '와일드 매직':{plan:'blob',kind:'orb',float:1,k:1,skin:'#a060ff',core:'#f0e0ff',r:6,fx:'200,130,255'},
+ '매드 리자드맨':V('리자드맨',{skin:'#7a4a3a',crest:'#ff4020',weapon:'axe',shield:null,eye:'#ff3020',eyeGlow:'255,60,30',fx:'255,90,50',hunch:5}),
+ '하이 리자드맨':V('리자드맨',{k:1.2,skin:'#3a6a6a',crest:'#e0c060',armor:'#8a7a50',cloth:'#5a4a30',pads:'#a08a50',cape:'#3a4a6a',trim:'#e0c060',fx:'160,240,255'}),
+ '헤비 리자드맨':V('리자드맨',{k:1.35,skin:'#4a5a3a',armor:'#5a5e66',cloth:'#5a5e66',pads:'#6a6e78',helm:null,weapon:'club',wcol:'#6a6e78',shield:'#5a5e66',bulk:1.35,fx:'200,220,255'}),
+ '리자드맨 검사':V('리자드맨',{skin:'#4a7a5a',weapon:'sword',shield:null,cape:'#5a3a2a',fx:'220,255,200'}),
+ '리자드맨 전사':V('리자드맨',{skin:'#5a7a3a',weapon:'axe',pads:'#7a6a4a',fx:'255,220,160'}),
+ '리자드맨 마법사':V('리자드맨',{skin:'#3a6a7a',cloth:'#3a3a6a',robe:1,weapon:'staff',ocol:'#80e0ff',caster:1,shield:null,trim:'#c0a040',fx:'130,220,255'}),
+ '도마뱀':{plan:'quad',k:.9,skin:'#7a8a4a',chest:'#b0b070',h:4,len:11,wideLegs:1.6,legW:2.2,bodyR:3.4,snout:1.3,tail:1,tailN:5,tailL:3,tailUp:0,tailW:2,eye:'#201810',fx:'200,255,150'},
+ '블루 테일':{plan:'quad',k:1.1,skin:'#4a5a7a',chest:'#a0b0c8',h:5,len:12,wideLegs:1.5,legW:2.4,bodyR:3.8,snout:1.3,spines:'#80a0e0',tail:1,tailN:6,tailL:3.5,tailUp:.2,tailW:2.6,tailc:'#3a7aff',eye:'#ffe060',fx:'120,180,255'},
+ '라버본':{plan:'biped',head:'skull',bone:1,armor:'#3a2a24',weapon:'club',wcol:'#4a2a1a',eyeGlow:'255,120,30',fx:'255,120,30',aura:'255,120,30',bulk:1.15},
+ '라버본 솔져':{plan:'biped',head:'skull',bone:1,armor:'#3a2a24',weapon:'spear',shield:'#4a2010',helm:'#4a2a1a',eyeGlow:'255,120,30',fx:'255,120,30',aura:'255,120,30'},
+ '라버본 헤드':{plan:'blob',kind:'skull',float:1,k:.9,r:5,bone:'#d8c8b0',fx:'255,110,30'},
+ '맘보토끼':{plan:'biped',head:'rabbit',k:.85,skin:'#f0e8e0',cloth:'#e07a30',pants:'#c05a20',weapon:'club',wcol:'#8a5a2a',belt:'#5a3a1a',fx:'255,200,120',eye:'#3a1a1a'},
+ '맘보토끼졸개':{plan:'biped',head:'rabbit',k:.7,skin:'#d8c8b8',cloth:'#a06030',pants:'#8a4a20',weapon:'dagger',fx:'255,210,150',eye:'#3a1a1a'},
+ '열혈토끼':{plan:'biped',head:'rabbit',k:.8,skin:'#f4e4d8',cloth:'#c02020',pants:'#801010',helm:'#d04020',weapon:'claws',claws:1,fx:'255,90,60',aura:'255,90,60',eye:'#c01010'},
+ '키위 패롯':{plan:'bird',k:1,skin:'#4ab040',wings:'#3a80d0',tailc:'#e04030',comb:'#f0d030',beakC:'#e8e0c0',beakL:3.8,beakW:2.2,eye:'#ffffff',fx:'160,255,140'},
+ '펠리컬':{plan:'bird',k:1.2,skin:'#f0f0ec',wings:'#d8d8d0',tailc:'#c8c8c0',comb:'#f0f0ec',beakC:'#f0b030',beakL:8,pouch:'#f0a040',eye:'#202020',fx:'200,230,255'},
+ '네크로맨서':{plan:'biped',head:'hood',hood:'#141418',cloth:'#1a1a20',robe:1,weapon:'staff',scol:'#d8d0c0',ocol:'#60ff90',caster:1,trim:'#5a8a5a',eye:'#60ff90',eyeGlow:'90,255,140',fx:'90,255,140',aura:'90,255,140'},
+ '불의 대정령':{...ELEM,head:'demon',skin:'#e05a1a',cloth:'#ff8a20',armor:'#d04010',horns:'#ffd060',eye:'#fff0a0',eyeGlow:'255,230,120',fx:'255,130,40',aura:'255,130,40'},
+ '물의 대정령':{...ELEM,head:'plain',skin:'#4a90d0',cloth:'#5aa0e0',armor:'#4a90d0',hair:'#8ac8ff',eye:'#e0ffff',eyeGlow:'170,230,255',fx:'110,190,255',aura:'110,190,255'},
+ '바람의 대정령':{...ELEM,head:'plain',skin:'#b0e8d0',cloth:'#c8f4e4',armor:'#a0e0c8',hair:'#e0fff4',eye:'#ffffff',eyeGlow:'200,255,230',fx:'190,255,220',aura:'190,255,220'},
+ '땅의 대정령':V('돌 골렘',{k:1.5,skin:'#7a6a4a',armor:'#7a6a4a',pants:'#6a5a3a',pads:'#5a7a3a',eye:'#c0ff60',eyeGlow:'170,255,80',fx:'190,230,110',aura:'170,220,90'}),
+ '킬러비':{plan:'bug',k:.85,fly:7,skin:'#e0b020',abd:'#e0b020',stripes:'#1a1410',legs:6,spread:5,knee:1,segs:[[0,-5,0,3],[0,-.5,0,2],[0,2.5,0,1.8]],bwings:1,wingL:9,wingC:'#e8f4ff',sting:1,eye:'#1a1410',fx:'255,220,80'},
+ '독침 킬러비':{plan:'bug',k:.95,fly:7,skin:'#8ac020',abd:'#8ac020',stripes:'#1a2010',legs:6,spread:5,knee:1,segs:[[0,-5,0,3.2],[0,-.5,0,2],[0,2.5,0,1.8]],bwings:1,wingL:9,wingC:'#e8f4ff',sting:1,eye:'#e02020',fx:'170,255,60'},
+ '볼 라이트닝':{plan:'blob',kind:'orb',float:1,k:.9,skin:'#f0f0a0',core:'#ffffff',r:5,fx:'255,255,150'},
+ '가디언 아머':V('리빙아머',{k:1.3,helm:'#b8a060',armor:'#b8a060',pads:'#d0b870',pants:'#8a7840',shield:'#b8a060',trim:'#ffffff',weapon:'spear',eye:'#ffe080',eyeGlow:'255,230,120',fx:'255,230,150',aura:'255,230,150'}),
+ '꿈의 혼령':V('유령',{cloth:'#e8c8f0',armor:'#e8c8f0',hand:'#f0e0f8',skin:'#f0e0f8',head:'plain',hair:'#f8e8ff',eye:'#a080ff',eyeGlow:'190,150,255',fx:'230,180,255',aura:'230,180,255'}),
+ '밀림 호랑이':V('샤벨 타이거',{k:1.35,sabers:0,skin:'#e08a30',eye:'#d0e040'}),
+ '자이언트':V('오우거',{k:1.7,skin:'#c09878',cloth:'#6a5a40',pants:'#5a4a30',belly:0,hair:'#5a3a20',beard:'#5a3a20',weapon:'club',head:'plain'}),
+ '에이션트 자이언트':V('오우거',{k:2,skin:'#8a9aa0',cloth:'#4a5a6a',pants:'#3a4a5a',belly:0,hair:'#d8d8d8',beard:'#e0e0e0',weapon:'club',wcol:'#5a5a5a',head:'plain',pads:'#6a7a8a',aura:'180,220,255',fx:'180,220,255'}),
+ '페르페르':{plan:'blob',k:.8,skin:'#e0c890',r:7,core:null,fx:'255,230,160'},
+ '블루 하피':V('하피',{skin:'#b0c8e0',cloth:'#3a5a8a',pants:'#2a4a6a',hair:'#2a4a8a',wings:'#4a7ac0',fx:'140,190,255'}),
+ '마이노':{plan:'biped',head:'bull',k:1.1,skin:'#8a6a4a',cloth:'#6a4a2a',pants:'#5a3a24',horns:'#e8dcc0',weapon:'club',bulk:1.15,eye:'#ff8040',fx:'255,180,120'},
+ '와이번':V('드레이크',{k:1.5,legs:4,skin:'#5a6a3a',chest:'#b0a060',wings:'#4a5a2a',horns:'#d8d0b0',spines:'#c0b070',eye:'#ffe060',eyeGlow:'255,220,80',fx:'220,255,110'}),
+ '유니 드래곤':V('드레이크',{k:1.6,skin:'#e8e8f0',chest:'#c0d0f0',wings:'#a0b8e0',horns:null,horn1:'#f0d070',spines:'#c0d8ff',eye:'#6080ff',eyeGlow:'120,150,255',fx:'190,210,255'}),
+ '테라 드래곤':V('드레이크',{k:1.8,skin:'#6a5a3a',chest:'#a08a5a',wings:'#5a4a2a',horns:'#e0d0b0',spines:'#7a8a4a',shell:'#5a6a3a',eye:'#d0ff60',eyeGlow:'190,255,90',fx:'200,230,110'}),
+ '해적 라쿤':{plan:'biped',head:'raccoon',k:.85,skin:'#8a8a8a',bandana:'#c02020',cloth:'#2a3a6a',pants:'#3a2a1a',belt:'#5a3a1a',tail:1,tailc:'#6a6a6a',weapon:'sword',wcol:'#d0d8e0',eye:'#ffe060',fx:'255,220,160'},
+});}
 // 크기별 시트 칸
 function kOf(n){const s=SPEC[n];return(s.k||1)*(PS[s.plan]||1);}
 function cellOf(n){const s=SPEC[n],k=kOf(n),big=s.plan==='quad'||s.plan==='bug'?1.25:1;return Math.round(Math.min(160,Math.max(80,96*k*big))/8)*8;}
