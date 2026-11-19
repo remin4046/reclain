@@ -2679,7 +2679,22 @@ const Store={mode:'online',
   async save(p){if(this.saving)return;this.saving=true;try{const copy=JSON.parse(JSON.stringify(p));
       const{error}=await SB.from('characters').upsert({id:p.id,owner:SESSION.user.id,name:p.name,look:p.look,lv:p.lv,data:copy,updated_at:new Date().toISOString()});
       if(error)throw error;}finally{this.saving=false;}},
-  async del(id){await SB.from('characters').delete().eq('id',id);}};
+  async del(id){await SB.from('characters').delete().eq('id',id);},
+  async softDel(c,on){const d=JSON.parse(JSON.stringify(c));if(on)d.delAt=Date.now();else delete d.delAt;const{error}=await SB.from('characters').update({data:d}).eq('id',c.id);if(error)throw error;}};
+const DEL_DAYS=7,DEL_MS=DEL_DAYS*864e5;
+function delLeft(c){return Math.max(0,c.delAt+DEL_MS-Date.now());}
+function delWhen(c){const d=new Date(c.delAt+DEL_MS);return (d.getMonth()+1)+'월 '+d.getDate()+'일 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function askDelete(c){const old=$('#delw');if(old)old.remove();const w=document.createElement('div');w.id='delw';w.className='panel';
+  w.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:80;width:min(380px,92vw);padding:16px 18px;line-height:1.6';
+  w.innerHTML='<h3 style="margin:0 0 10px;color:#f3dd9c">캐릭터 삭제</h3><p style="margin:0 0 6px">「<b style="color:#f3dd9c">'+esc(c.name)+'</b>」 캐릭터를 삭제하시겠습니까?</p>'
+   +'<p class="note" style="margin:0 0 6px">삭제하시려면 캐릭터명을 입력하시기 바랍니다.</p><input class="tx" id="delnm" autocomplete="off" placeholder="'+esc(c.name)+'" style="width:100%;box-sizing:border-box">'
+   +'<p class="note" style="margin:8px 0 0;color:#ffb48a">삭제는 '+DEL_DAYS+'일 후 완료됩니다. 그 전까지는 캐릭터 선택 화면에서 복구할 수 있습니다.</p>'
+   +'<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn sm" id="delno">취소</button><button class="btn sm" id="delok" disabled>삭제</button></div><div class="note" id="delmsg" style="color:#ff9a7a"></div>';
+  document.body.appendChild(w);const inp=$('#delnm'),ok=$('#delok');inp.focus();
+  inp.oninput=()=>{ok.disabled=inp.value.trim()!==c.name;};
+  inp.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter'&&!ok.disabled)ok.click();if(e.key==='Escape')w.remove();};
+  $('#delno').onclick=()=>w.remove();
+  ok.onclick=async()=>{ok.disabled=true;try{await Store.softDel(c,true);w.remove();showSelect();}catch(e){$('#delmsg').textContent='삭제 실패: '+(e.message||e);ok.disabled=false;}};}
 async function loadProfile(){const{data}=await SB.from('profiles').select('username').eq('id',SESSION.user.id).maybeSingle();USERNAME=data?data.username:(SESSION.user.email||'').replace(ID_DOMAIN,'');}
 function snapshotP(){const o={...P};delete o.fx;delete o.fy;delete o.t;delete o.atkT;delete o.hitT;delete o.dir;delete o._t;return o;}
 async function saveNow(silent){if(!P||!SESSION)return;G.saveDirty=false;try{await Store.save(snapshotP());if(!silent)log('서버에 저장되었습니다.','c-sys');}catch(e){G.saveDirty=true;log('저장 실패: '+(e.message||e)+' (잠시 후 다시 시도합니다)','c-bad');}}
@@ -2805,12 +2820,15 @@ async function showSelect(){$('#hud').classList.add('hidden');$('#screen').class
   box.innerHTML='<div class="logo">리클라인</div><div class="sub">RECLAIN · 말하는 섬에서 시작되는 모험</div><div class="note" style="text-align:center;margin-bottom:10px">캐릭터 불러오는 중…</div>';
   let chars;try{chars=await Store.list();}catch(e){box.innerHTML='<div class="logo">리클라인</div><p style="text-align:center;color:#ff9a7a">캐릭터를 불러오지 못했습니다: '+esc(e.message||e)+'</p><p style="text-align:center"><button class="btn" onclick="showSelect()">다시 시도</button> <button class="btn" onclick="logout()">로그아웃</button></p>';return;}
   let h='<div class="logo">리클라인</div><div class="sub">RECLAIN · 말하는 섬에서 시작되는 모험</div><h3 class="ttl" style="margin:0 0 8px;display:flex;justify-content:space-between">캐릭터 선택 <span class="note" style="font-family:inherit">'+esc(USERNAME)+' 님 · <a href="#" id="blogout" style="color:#d9b86a">로그아웃</a></span></h3><div class="slots">';
-  for(let i=0;i<4;i++){const c=chars[i];if(c)h+='<div class="slot" data-i="'+i+'"><div class="cvh"></div><b style="color:#f3dd9c">'+esc(c.name)+'</b><div class="note">Lv.'+c.lv+' '+esc(LOOKS[c.look].name)+'</div><button class="btn sm" data-del="'+c.id+'" style="margin-top:6px">삭제</button></div>';
+  for(const c of chars.filter(c=>c.delAt&&delLeft(c)<=0)){try{await Store.del(c.id);}catch(e){}}chars=chars.filter(c=>!(c.delAt&&delLeft(c)<=0));
+  for(let i=0;i<4;i++){const c=chars[i];if(c&&c.delAt){const dl=Math.ceil(delLeft(c)/864e5);h+='<div class="slot" data-i="'+i+'" data-pend="1" style="opacity:.8"><div class="cvh" style="filter:grayscale(1) brightness(.6)"></div><b style="color:#9a8f7a;text-decoration:line-through">'+esc(c.name)+'</b><div class="note">Lv.'+c.lv+' '+esc(LOOKS[c.look].name)+'</div><div class="note" style="color:#ff9a7a">삭제 대기 · D-'+dl+'<br>'+delWhen(c)+' 삭제 완료</div><button class="btn sm" data-res="'+i+'" style="margin-top:6px">복구</button></div>';}
+    else if(c)h+='<div class="slot" data-i="'+i+'"><div class="cvh"></div><b style="color:#f3dd9c">'+esc(c.name)+'</b><div class="note">Lv.'+c.lv+' '+esc(LOOKS[c.look].name)+'</div><button class="btn sm" data-del="'+i+'" style="margin-top:6px">삭제</button></div>';
     else h+='<div class="slot" data-new="1" style="display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:34px;color:#6b5532">+</div><div class="note">새 캐릭터</div></div>';}
   h+='</div><p class="note" style="margin-top:12px">캐릭터는 내 계정에 저장되어 어느 컴퓨터에서든 이어서 할 수 있습니다. 조작: 클릭 이동·공격, WASD/방향키 이동, Space 근접 대상 공격, 1~6 단축키, I 장비창, C 캐릭터, K 마법, Enter 채팅, Alt 바닥 아이템 이름</p>';
   box.innerHTML=h;$('#blogout').onclick=e=>{e.preventDefault();logout();};
-  box.querySelectorAll('.slot[data-i]').forEach(el=>{const c=chars[+el.dataset.i];el.querySelector('.cvh').appendChild(previewCanvas(c.look,64,100));el.onclick=e=>{if(e.target.dataset.del)return;startGame(c);};});
-  box.querySelectorAll('[data-del]').forEach(b=>b.onclick=async e=>{e.stopPropagation();if(b.dataset.confirm){await Store.del(b.dataset.del);showSelect();}else{b.dataset.confirm=1;b.textContent='정말 삭제';}});
+  box.querySelectorAll('.slot[data-i]').forEach(el=>{const c=chars[+el.dataset.i];el.querySelector('.cvh').appendChild(previewCanvas(c.look,64,100));el.onclick=e=>{if(e.target.dataset.del||e.target.dataset.res)return;if(c.delAt){alert('삭제 대기 중인 캐릭터입니다. 복구한 뒤 접속할 수 있습니다.');return;}startGame(c);};});
+  box.querySelectorAll('[data-del]').forEach(b=>b.onclick=e=>{e.stopPropagation();askDelete(chars[+b.dataset.del]);});
+  box.querySelectorAll('[data-res]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const c=chars[+b.dataset.res];if(!confirm('「'+c.name+'」 캐릭터를 복구하시겠습니까?'))return;b.disabled=true;try{await Store.softDel(c,false);showSelect();}catch(err){alert('복구 실패: '+(err.message||err));b.disabled=false;}});
   box.querySelectorAll('[data-new]').forEach(el=>el.onclick=()=>showCreate());}
 function showCreate(){const box=$('#sbox');let sel='kM',alloc={};
   const draw=()=>{const L=LOOKS[sel],cl=GD.classes[L.cls];const base=STATS.reduce((o,k)=>(o[k]=cl[k],o),{});const used=STATS.reduce((a,k)=>a+(alloc[k]||0),0),left=cl.bonus-used;
