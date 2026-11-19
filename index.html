@@ -147,6 +147,26 @@ table.t th{color:var(--gold);position:sticky;top:0;background:#16110b}
 </style>
 </head>
 <body>
+<style id="mobileui">
+/* ===== 모바일 전용 HUD 배치 (body.mobile 일 때만 적용, PC는 기존 그대로) ===== */
+body.mobile #menu{left:4px;right:auto;top:50%;bottom:auto;transform:translateY(-50%);flex-direction:column;gap:4px;padding:4px}
+body.mobile #menu .btn.sm{padding:6px 7px;font-size:11px;white-space:nowrap;text-align:center}
+body.mobile #hot{left:0;right:0;bottom:0;transform:none;justify-content:center;gap:3px;padding:4px 4px calc(4px + env(safe-area-inset-bottom));border-radius:0;border-left:0;border-right:0;border-bottom:0}
+body.mobile .hk{width:min(54px,calc((100vw - 36px)/6));height:min(54px,calc((100vw - 36px)/6))}
+body.mobile .hk img{width:24px;height:24px}
+body.mobile #log{left:4px;right:4px;width:auto;bottom:calc(min(54px,(100vw - 36px)/6) + 14px + env(safe-area-inset-bottom));height:112px;padding:4px 6px;font-size:11.5px}
+body.mobile #mini canvas{width:110px;height:110px}
+body.mobile #stat{width:calc(100vw - 150px);max-width:250px}
+@media (orientation:landscape){
+ body.mobile #menu{top:auto;bottom:6px;transform:none}
+ body.mobile #log{left:auto;right:4px;width:42vw;height:96px}
+ body.mobile #hot{left:50%;right:auto;transform:translateX(-50%);border-radius:4px}
+}
+</style>
+<script>
+/* 모바일/PC 접속 구분: 터치 위주 기기(손가락 포인터) 또는 모바일 브라우저면 body에 mobile 클래스 */
+(function(){var ua=navigator.userAgent||'';var m=/Android|iPhone|iPad|iPod|Mobile|SamsungBrowser|KAKAOTALK/i.test(ua)||(window.matchMedia&&matchMedia('(pointer:coarse)').matches&&!matchMedia('(pointer:fine)').matches);if(m)document.body.classList.add('mobile');window.IS_MOBILE=m;})();
+</script>
 <canvas id="cv"></canvas>
 <div id="screen"><div class="box panel" id="sbox"></div></div>
 <div id="hud" class="hidden">
