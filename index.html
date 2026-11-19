@@ -135,6 +135,10 @@ table.t th{color:var(--gold);position:sticky;top:0;background:#16110b}
 .bag.drop{outline:1px dashed #f3dd9c;outline-offset:2px}
 #qty{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:70;padding:14px 16px;width:280px}
 #qty h3{margin:0 0 8px;font-size:15px}#qty .row{display:flex;gap:6px;align-items:center;margin:8px 0}#qty input[type=number]{width:90px}#qty input[type=range]{flex:1}
+.iinfo .hd{display:flex;gap:12px;align-items:center;margin-bottom:10px}.iinfo .hd img{width:56px;height:56px;border:1px solid #6a5a48;border-radius:4px;background:#0d0a07}
+.iinfo .hd b{font-size:18px;font-family:'Nanum Myeongjo',serif}.iinfo .kv{grid-template-columns:110px 1fr;font-size:12.5px;gap:3px 10px}
+.iinfo .sec{margin-top:10px;padding-top:8px;border-top:1px dashed #4a3a22;font-size:12.5px;line-height:1.6}.iinfo .sec>b{color:var(--gold2);display:block;margin-bottom:2px}
+.iinfo .chip{display:inline-block;margin:2px 4px 2px 0;padding:1px 7px;border:1px solid #4a3a22;border-radius:10px;background:#120d08;font-size:12px;cursor:pointer}.iinfo .chip:hover{border-color:var(--gold)}
 #online{position:absolute;right:10px;top:278px;padding:6px 8px;font-size:11.5px;max-width:200px}
 @media (max-width:760px){.chars{grid-template-columns:repeat(4,1fr)}#log{width:60vw;height:120px}#mini canvas{width:120px;height:120px}#inv{right:4px;width:94vw}}
 </style>
@@ -1854,8 +1858,39 @@ function findItem(q){const k=nz(q),names=Object.keys(GD.items).concat('아데나
   const ex=names.find(n=>nz(n)===k);if(ex)return[ex];return names.filter(n=>nz(n).includes(k));}
 function runCmd(t){const a=t.slice(1).trim().split(/\s+/);const cmd=a.shift()||'';
   if(cmd==='아이템'&&a[0]==='생성'){a.shift();cmdItem(a);return;}if(cmd==='아이템생성'){cmdItem(a);return;}
-  if(cmd==='도움말'||cmd==='명령어'){log('명령어: /아이템 생성 [+강화] 이름 [수량]  예) /아이템 생성 초록물약 10 · /아이템 생성 +10 마나의 지팡이','c-sys');return;}
+  if(cmd==='아이템'&&a[0]==='정보'){a.shift();cmdInfo(a);return;}if(cmd==='아이템정보'){cmdInfo(a);return;}
+  if(cmd==='도움말'||cmd==='명령어'){log('명령어: /아이템 정보 [+강화] 이름  예) /아이템 정보 +7 마나의 지팡이','c-sys');if(ADMINS.includes(USERNAME))log('운영자: /아이템 생성 [+강화] 이름 [수량]  예) /아이템 생성 초록물약 10','c-sys');return;}
   log('알 수 없는 명령어입니다: /'+cmd+'  (/도움말)','c-bad');}
+function cmdInfo(a){if(!a.length){log('사용법: /아이템 정보 [+강화] 이름  예) /아이템 정보 +7 마나의 지팡이','c-sys');return;}
+  let en=0;if(/^[+-]\d+$/.test(a[0]))en=parseInt(a.shift(),10);const name=a.join(' ');if(!name){log('아이템 이름을 입력하세요.','c-bad');return;}
+  const hit=findItem(name).filter(n=>n!=='아데나');if(!hit.length){log('「'+name+'」에 해당하는 아이템이 없습니다.','c-bad');return;}
+  if(hit.length>1){infoPick(name,hit,en);return;}itemInfoWin(hit[0],en);}
+function infoPick(q,list,en){const w=$('#npc');w.classList.remove('hidden');G.npcOpen={n:{}};
+  w.innerHTML='<h3 class="ttl">아이템 검색: '+esc(q)+' <span class="x">✕</span></h3><div class="iinfo"><div class="note">'+list.length+'개가 검색됐습니다. 보고 싶은 아이템을 누르세요.</div><div style="margin-top:8px;max-height:50vh;overflow:auto">'+
+    list.slice(0,60).map(n=>'<span class="chip '+rarity(n)+'" data-n="'+esc(n)+'"><img src="'+itemIcon(n)+'" style="width:18px;height:18px;vertical-align:-4px;margin-right:3px">'+esc(n)+'</span>').join('')+(list.length>60?'<div class="note">… 외 '+(list.length-60)+'개 (이름을 더 자세히 입력하세요)</div>':'')+'</div></div>';
+  w.querySelector('.x').onclick=closeNpc;w.querySelectorAll('[data-n]').forEach(c=>c.onclick=()=>itemInfoWin(c.dataset.n,en));}
+function itemInfoWin(n,en){const d=ITEM(n),w=$('#npc');w.classList.remove('hidden');G.npcOpen={n:{},refresh:()=>itemInfoWin(n,en)};
+  const canEn=d.cat==='무기'||d.cat==='방어구'||d.cat==='액세서리';en=canEn?Math.max(-7,Math.min(20,en||0)):0;const it={n,q:1,e:en};
+  const rows=[['분류',[d.cat,d.sub].filter(Boolean).join(' · ')||'-']];
+  if(d.ds!=null)rows.push(['타격치 (작은/큰)',(d.ds+en)+' / '+(d.dl+en)+(en?' <span class="note">(+'+en+' 포함)</span>':'')]);
+  if(d.ac!=null&&d.cat!=='무기')rows.push(['AC',(d.ac+(d.cat==='방어구'?en:0))]);
+  rows.push(['사용 클래스',d.cls?esc(d.cls.replace(/[\[\]]/g,'').trim().split(/\s+/).join(', ')):'모든 클래스']);
+  if(d.opt)rows.push(['옵션',esc(d.opt)]);if(d.mat)rows.push(['재질',esc(d.mat)]);if(d.wt!=null)rows.push(['무게',d.wt]);
+  if(d.safe!=null)rows.push(['안전 인챈트','+'+d.safe+(canEn&&en>d.safe?' <span class="u-lv">(현재 +'+en+', 안전 수치 초과)</span>':'')]);
+  if(slotOf(n))rows.push(['착용 부위',(SLOTS.find(s=>s[0]===slotOf(n))||[0,slotOf(n)==='ring'?'반지':slotOf(n)])[1]]);
+  rows.push(['상점가',d.price?fmt(d.price)+' 아데나':'판매하지 않음']);rows.push(['되팔기',fmt(sellPrice(it))+' 아데나']);rows.push(['보유',fmt(invCount(n))+'개']);
+  let h='<h3 class="ttl">아이템 정보 <span class="x">✕</span></h3><div class="iinfo"><div class="hd"><img src="'+itemIcon(n)+'"><div><b class="'+rarity(n)+'">'+esc(itemName(it))+'</b><div class="note">'+esc(d.kind||d.sub||'')+'</div></div></div>';
+  h+='<div class="kv">'+rows.map(([a,b])=>'<span>'+a+'</span><span>'+b+'</span>').join('')+'</div>';
+  if(d.desc)h+='<div class="sec"><b>설명</b>'+esc(d.desc)+'</div>';
+  const ench=GD.enchant&&GD.enchant[n];if(canEn&&ench&&ench.length)h+='<div class="sec"><b>강화 효과</b>'+ench.slice(0,12).map((t,i)=>'<span class="chip" style="cursor:default'+(i+1===en?';border-color:#f3dd9c;color:#f3dd9c':'')+'">+'+(i+1)+' '+esc(t)+'</span>').join('')+'</div>';
+  if(BOOK2SK[n]){const S=SPELLS[BOOK2SK[n]];h+='<div class="sec"><b>배우는 마법</b>「'+esc(S.name)+'」 · Lv.'+S.lv+' 이상 · '+S.cls.map(c=>CLSNAME[c]).join(', ')+'<br><span class="note">'+esc(S.desc)+'</span></div>';}
+  const ds=dropsOf(n);h+='<div class="sec"><b>얻는 곳</b>'+(d.how?esc(d.how)+'<br>':'')+(ds.length?'드롭 몬스터: '+ds.slice(0,14).map(([m,l])=>'<span class="chip" style="cursor:default">'+esc(m)+(l?' Lv.'+l:'')+'</span>').join('')+(ds.length>14?' 외 '+(ds.length-14)+'종':''):(d.how?'':'<span class="note">알려진 획득처가 없습니다.</span>'))+'</div>';
+  const rc=GD.recipes&&GD.recipes[n];if(rc)h+='<div class="sec"><b>제작 재료</b>'+rc.map(([m,q])=>'<span class="chip" data-n="'+esc(m)+'">'+esc(m)+' ×'+q+'</span>').join('')+'</div>';
+  const used=Object.entries(GD.recipes||{}).filter(([,l])=>l.some(([m])=>m===n)).map(([k])=>k);if(used.length)h+='<div class="sec"><b>재료로 쓰이는 곳</b>'+used.slice(0,16).map(k=>'<span class="chip" data-n="'+esc(k)+'">'+esc(k)+'</span>').join('')+'</div>';
+  if(ADMINS.includes(USERNAME))h+='<div class="sec" style="display:flex;gap:6px;align-items:center"><span class="note" style="margin-right:auto">운영자</span><button class="btn sm" data-mk>1개 생성</button></div>';
+  w.innerHTML=h+'</div>';w.querySelector('.x').onclick=closeNpc;
+  w.querySelectorAll('[data-n]').forEach(c=>c.onclick=()=>itemInfoWin(c.dataset.n,0));
+  const mk=w.querySelector('[data-mk]');if(mk)mk.onclick=()=>cmdItem([...(en?['+'+en]:[]),n]);}
 function cmdItem(a){if(!ADMINS.includes(USERNAME)){log('운영자만 사용할 수 있는 명령어입니다.','c-bad');return;}
   if(!a.length){log('사용법: /아이템 생성 [+강화] 이름 [수량]  예) /아이템 생성 +10 마나의 지팡이','c-sys');return;}
   let en=0,q=1;if(/^[+-]\d+$/.test(a[0]))en=parseInt(a.shift(),10);if(a.length>1&&/^\d+$/.test(a[a.length-1]))q=parseInt(a.pop(),10);
