@@ -339,7 +339,7 @@ const WKIND={'한손검':'sword','둔기':'blunt','창':'spear','활':'bow','지
 // ---------- monsters ----------
 function monArch(n){
   const has=(...k)=>k.some(s=>n.includes(s));
-  if(has('바포메트'))return'demon';if(has('커츠','흑기사','데스나이트'))return'dknight';
+  if(has('바포메트'))return'demon';if(has('데스나이트'))return'dk';if(has('커츠','흑기사'))return'dknight';
   if(has('개구리'))return'frog';if(has('토끼'))return'rabbit';if(has('슬라임'))return'slime';
   if(has('늑대인간','라이칸'))return'wolfman';if(has('늑대','도베르만','비글','세퍼드'))return'dog';
   if(has('해골','스파토이'))return'skel';if(has('좀비','구울'))return'zombie';if(has('골렘'))return'golem';
@@ -349,9 +349,9 @@ function monArch(n){
 function hashc(s){let h=0;for(const ch of s)h=(h*31+ch.charCodeAt(0))|0;return Math.abs(h);}
 function monColor(n){const pal={'데스나이트':'#4a1a20','고블린':'#7a9a3a','오크':'#6b7a3a','오크 궁수':'#7d6a3a','오크 전사':'#5a6a2c','코볼트':'#a0603a','난쟁이':'#b07a50','난쟁이족 전사':'#8a5a3a','놀':'#9a7a4a','홉고블린':'#a05030','버그베어':'#7a5232','늑대':'#7d7d86','도베르만':'#2e2622','비글':'#c49a64','세퍼드':'#8a6a42','늑대인간':'#5a4a40','라이칸스로프':'#3c3a44','개구리':'#5aa04a','토끼':'#e8e0d6','슬라임':'#6ad0a0','좀비':'#7a9a7a','구울':'#8a8a6a','해골':'#e6e0cc','스파토이':'#d6c4a4','돌 골렘':'#8a8478','괴물 눈':'#c06080','셸로브':'#3a2e3e','웅골리언트':'#2a2030','장로':'#5a6a9a','흑기사':'#2a2a34','커츠':'#5a1a1a','바포메트':'#7a2a1a'};
   const k=Object.keys(pal).find(k=>n.startsWith(k));return k?pal[k]:'hsl('+hashc(n)%360+',35%,45%)';}
-const MSIZE={frog:.6,rabbit:.6,slime:.7,dog:.85,eye:.8,goblin:.9,skel:1,zombie:1,wolfman:1.15,bigman:1.25,golem:1.4,spider:1.2,elder:1,dknight:1.1,demon:1.9};
+const MSIZE={frog:.6,rabbit:.6,slime:.7,dog:.85,eye:.8,goblin:.9,skel:1,zombie:1,wolfman:1.15,bigman:1.25,golem:1.4,spider:1.2,elder:1,dknight:1.1,dk:1.5,demon:1.9};
 // box 64x64 feet at (32,60)
-function drawMon(c,arch,col,ph,dir){
+function drawMon(c,arch,col,ph,dir){if(arch==='dk'){drawDK(c,ph,dir);return;}
   const sw=Math.sin(ph*Math.PI/2),flip=dir==='W';
   c.save();if(flip){c.translate(64,0);c.scale(-1,1);}
   const d=shade(col,-45),l=shade(col,35);
@@ -404,6 +404,49 @@ function drawMon(c,arch,col,ph,dir){
   }
   c.restore();
 }
+
+// ===== 데스나이트 전용 모델 =====
+function drawDK(c,ph,dir){const sw=Math.sin(ph*Math.PI/2),flip=dir==='W',atk=ph===2;c.save();if(flip){c.translate(64,0);c.scale(-1,1);}c.translate(32,62);c.scale(.88,.88);c.translate(-32,-62);
+  const SOUL='#8ff7e4',BONE='#d9d1bb',st=(y0,y1)=>lg(c,0,y0,0,y1,['#6b7280','#30343d','#15171c']);
+  const glow=(x,y,r,a)=>{const g=c.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(220,255,250,'+a+')');g.addColorStop(.35,'rgba(110,240,215,'+a*.8+')');g.addColorStop(1,'rgba(60,200,180,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,r,0,7);c.fill();};
+  // 해진 망토(뒤)
+  c.fillStyle=lg(c,0,22,0,62,['#2b2236','#1a1422','#0b080f']);c.beginPath();c.moveTo(18,25);c.lineTo(46,25);c.quadraticCurveTo(50+sw,42,52+sw*2,58);
+  const hem=[[52,58],[48,62],[45,57],[41,63],[37,58],[33,62],[29,57],[25,63],[21,58],[17,61],[13,57]];hem.forEach(([x,y],i)=>c.lineTo(x+sw*(i%2?1.5:2),y));c.quadraticCurveTo(14-sw,42,18,25);c.fill();
+  c.strokeStyle='rgba(120,90,150,.35)';c.lineWidth=.7;for(const x of[22,30,38,46]){c.beginPath();c.moveTo(x,30);c.quadraticCurveTo(x+sw*2,46,x+sw*2-1,58);c.stroke();}
+  // 다리(그리브)
+  limb(c,27,44,26+sw*3,58,6.8,5.2,'#262a32');limb(c,37,44,38-sw*3,58,6.8,5.2,'#262a32');
+  c.fillStyle='#4a505c';c.beginPath();c.ellipse(26+sw*3,52,3.6,2.2,0,0,7);c.ellipse(38-sw*3,52,3.6,2.2,0,0,7);c.fill();
+  c.fillStyle='#0f1014';for(const x of[26+sw*3,38-sw*3]){c.beginPath();c.moveTo(x-5,61);c.lineTo(x+6,61);c.lineTo(x+4,57);c.lineTo(x-4,57);c.closePath();c.fill();}
+  // 흉갑
+  c.fillStyle=st(24,48);c.beginPath();c.moveTo(19,27);c.quadraticCurveTo(32,22,45,27);c.quadraticCurveTo(46,38,41,47);c.lineTo(23,47);c.quadraticCurveTo(18,38,19,27);c.fill();
+  c.strokeStyle='rgba(217,209,187,.55)';c.lineWidth=1.1;for(let i=0;i<3;i++){const y=31+i*4.2;c.beginPath();c.moveTo(31,y);c.quadraticCurveTo(25,y-1.5,22.5,y+2.5);c.moveTo(33,y);c.quadraticCurveTo(39,y-1.5,41.5,y+2.5);c.stroke();}
+  c.strokeStyle='rgba(0,0,0,.5)';c.lineWidth=1;c.beginPath();c.moveTo(32,26);c.lineTo(32,46);c.stroke();
+  glow(32,36,6,.9);c.strokeStyle=SOUL;c.lineWidth=.9;c.beginPath();c.moveTo(32,32);c.lineTo(31,35);c.lineTo(33,37);c.lineTo(31.5,40);c.stroke();
+  // 허리띠 + 해골 버클 + 갑옷 치마
+  c.fillStyle='#1b1d23';c.fillRect(22,44,20,3.5);c.fillStyle=BONE;c.beginPath();c.arc(32,45.5,2.6,0,7);c.fill();c.fillStyle='#111';c.fillRect(30.6,44.8,1.1,1.1);c.fillRect(32.4,44.8,1.1,1.1);
+  c.fillStyle=st(47,54);for(const[x,w]of[[22,6],[29,6],[36,6]]){c.beginPath();c.moveTo(x,47.5);c.lineTo(x+w,47.5);c.lineTo(x+w-1,54);c.lineTo(x+1,54);c.closePath();c.fill();}
+  // 팔
+  const ra=atk?-6:0;limb(c,21,30,16,38+sw,6,5,'#2a2e36');limb(c,16,38+sw,18,45+sw,5,4.4,'#22252c');limb(c,43,30,48,37-sw+ra,6,5,'#2a2e36');limb(c,48,37-sw+ra,47,44-sw+ra,5,4.4,'#22252c');
+  c.fillStyle='#14161a';c.beginPath();c.arc(18,46+sw,3,0,7);c.arc(47,45-sw+ra,3,0,7);c.fill();
+  // 견갑(뼈 가시)
+  for(const[x,s]of[[18,-1],[46,1]]){c.fillStyle=BONE;for(const[dx,h]of[[-2,9],[2,7]]){c.beginPath();c.moveTo(x+dx*s-2,24);c.lineTo(x+dx*s+s*1.5,24-h);c.lineTo(x+dx*s+2,24);c.fill();}
+    c.fillStyle=lg(c,0,20,0,32,['#7a8190','#363a44','#16181d']);c.beginPath();c.ellipse(x,27,7.5,5.5,s*.25,Math.PI,0);c.lineTo(x+7*s,30);c.quadraticCurveTo(x,33,x-7*s,30);c.fill();
+    c.strokeStyle='rgba(255,255,255,.18)';c.lineWidth=.8;c.beginPath();c.ellipse(x,27,5,3.5,s*.25,Math.PI*1.1,Math.PI*1.9);c.stroke();}
+  // 투구(해골 면갑)
+  c.fillStyle=lg(c,0,6,0,28,['#7d8494','#343842','#121418']);c.beginPath();c.moveTo(24,22);c.quadraticCurveTo(23,8,33,6.5);c.quadraticCurveTo(43,8,42,22);c.lineTo(39,27);c.lineTo(27,27);c.closePath();c.fill();
+  c.fillStyle=BONE;for(const[x,h]of[[27,7],[33,9],[39,7]]){c.beginPath();c.moveTo(x-2,9);c.lineTo(x+1.5,9-h);c.lineTo(x+2,9.5);c.fill();}
+  c.fillStyle='#07080a';c.beginPath();c.moveTo(26,15.5);c.lineTo(40,15.5);c.lineTo(38,19.5);c.lineTo(28,19.5);c.closePath();c.fill();
+  c.fillStyle=BONE;for(let i=0;i<5;i++)c.fillRect(27.6+i*2.3,22,1.4,3.2);c.fillStyle='#07080a';c.fillRect(27,21.3,12,.8);
+  glow(30,17.3,4,1);glow(36.5,17.3,4,1);c.fillStyle='#effffb';c.fillRect(29,16.8,2.2,1.2);c.fillRect(35.5,16.8,2.2,1.2);
+  // 영혼불(머리 위로 피어오름)
+  c.save();c.globalCompositeOperation='lighter';for(let i=0;i<3;i++){const x=29+i*4,t=ph*0.7+i;c.fillStyle='rgba(120,245,220,'+(.28-i*.05)+')';c.beginPath();c.moveTo(x-3,8);c.quadraticCurveTo(x-4+Math.sin(t)*2,1,x+Math.sin(t*1.7)*2,-4+i);c.quadraticCurveTo(x+4+Math.cos(t)*2,2,x+3,8);c.fill();}c.restore();
+  // 유령 대검
+  c.save();c.translate(47,44-sw+ra);c.rotate(atk?-1.15:-.42+sw*.12);
+  c.fillStyle='#1a1c22';c.fillRect(-1.3,-1,2.6,7);c.fillStyle=BONE;c.beginPath();c.arc(0,7,1.8,0,7);c.fill();
+  c.strokeStyle=BONE;c.lineWidth=1.8;c.beginPath();c.moveTo(-6,-2.5);c.quadraticCurveTo(0,0,6,-2.5);c.stroke();
+  c.shadowColor=SOUL;c.shadowBlur=6;c.fillStyle=lg(c,-2.4,0,2.4,0,['#9fb6c0','#e8fbff','#7f97a3']);c.beginPath();c.moveTo(-2.4,-2);c.lineTo(-2,-30);c.lineTo(0,-35);c.lineTo(2,-30);c.lineTo(2.4,-2);c.closePath();c.fill();c.shadowBlur=0;
+  c.strokeStyle='rgba(60,210,190,.9)';c.lineWidth=.7;c.beginPath();for(let y=-5;y>-28;y-=4){c.moveTo(0,y);c.lineTo(-.9,y-1.6);c.lineTo(.9,y-2.6);}c.stroke();c.restore();
+  c.restore();}
 
 // ---------- caches ----------
 const SPR={};
@@ -637,7 +680,10 @@ function genDungeon(id){
   const floors=[];for(let i=0;i<W*H;i++)if(M.t[i]===T.CFLOOR&&!M.b[i]&&dist[i]>12)floors.push(i);
   for(let k=0;k<cnt;k++){const i=floors[(r()*floors.length)|0],[x,y]=P(i);const lvW=list.map(n=>1/(1+Math.abs(GD.mons[n].lv-(id===1?8:13))));let tot=lvW.reduce((a,b)=>a+b),pick=r()*tot,n=list[0];for(let j=0;j<list.length;j++){pick-=lvW[j];if(pick<=0){n=list[j];break;}}
     M.spawns.push({n,x,y,box:[x-6,y-6,x+6,y+6]});}
-  if(id===2){const b=GD.mapMons[2].find(n=>GD.mons[n].boss);if(b)M.spawns.push({n:b,x:fp[0],y:fp[1],box:[fp[0]-4,fp[1]-4,fp[0]+4,fp[1]+4],boss:true});}
+  if(id===2){const b=GD.mapMons[2].find(n=>GD.mons[n].boss);if(b)M.spawns.push({n:b,x:fp[0],y:fp[1],box:[fp[0]-4,fp[1]-4,fp[0]+4,fp[1]+4],boss:true});
+    // 데스나이트: 입구와 바포메트 사이 깊은 곳
+    let bi=-1,bd=1e9;const tg=dist[far]*.6;for(const i of floors){const dd=Math.abs(dist[i]-tg)+(Math.abs((i%W)-(far%W))+Math.abs(((i/W)|0)-((far/W)|0))<30?50:0);if(dd<bd){bd=dd;bi=i;}}
+    if(bi>=0){const[x,y]=P(bi);M.spawns.push({n:'데스나이트',x,y,box:[x-3,y-3,x+3,y+3],boss:true});M.dkPos=[x,y];}}
   return M;
 }
 
@@ -889,6 +935,8 @@ const SPELLS={
   rtn:{name:'리턴 투 네이쳐',mp:30,cls:['elf'],lv:40,kind:'atk',el:'땅',range:8,dmg:[10,20],spm:2,icon:'leaf',book:'정령의 수정 (리턴 투 네이쳐)',eff:'HP가 30% 이하인 몬스터(보스 제외)를 자연으로 돌려보내 즉시 처치합니다.',desc:'생명을 자연의 품으로 돌려보냅니다.'},
   brfire:{name:'브레스 오브 파이어',mp:30,cls:['elf'],lv:45,kind:'atk',el:'불',range:6,aoe:2,dmg:[28,50],spm:3,icon:'fire',book:'정령의 수정 (브레스 오브 파이어)',desc:'불의 정령이 화염을 내뿜습니다.'},
 };
+GD.mons['데스나이트']=GD.mons['데스나이트']||{id:45601,lv:52,boss:true};
+GD.drops['데스나이트']=GD.drops['데스나이트']||['데스나이트의 투구','데스나이트의 갑옷','데스나이트의 장갑','데스나이트의 부츠','데스 블레이드','무기 마법 주문서','갑옷 마법 주문서','아데나'];
 const POLY={'데스나이트':{lv:52,skill:true,eq:'전체',spd:{'이동':667,'주먹':650,'한손검':683,'도끼':767,'지팡이':683,'단검':650,'양손검':767,'공격 마법':1083,'버프 마법':1083}}};
 function polyOf(p){return p&&p.poly&&POLY[p.poly.n]?POLY[p.poly.n]:null;}
 const BOOK2SK={};for(const k in SPELLS)if(SPELLS[k].book)BOOK2SK[SPELLS[k].book]=k;
@@ -958,7 +1006,7 @@ function inSafe(x,y){if(!G.map)return false;if(G.map.safe)return G.map.safe.some
 function findNear(M,x,y){for(let r=2;r<8;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){if(Math.max(Math.abs(dx),Math.abs(dy))!==r)continue;if(M.walk(x+dx,y+dy)&&!M.portals.some(p=>p.x===x+dx&&p.y===y+dy))return[x+dx,y+dy];}return[x,y];}
 function mstat(n){const m=GD.mons[n]||{lv:1};const lv=m.lv,boss=m.boss;
   return{lv,boss,mhp:Math.round((8+lv*lv*0.9+lv*7)*(boss?9:1)),dmg:[1+Math.floor(lv/4),2+Math.floor(lv*1.25)+(boss?lv/2:0)],ac:Math.max(-15,8-Math.floor(lv/2)),
-    exp:Math.round((lv*lv+3)*(boss?12:1)),aggro:boss||/흑기사|해골|스파토이|좀비|구울|버그베어|늑대인간|라이칸|장로|웅골리언트|셸로브|괴물 눈/.test(n),
+    exp:Math.round((lv*lv+3)*(boss?12:1)),aggro:boss||/데스나이트|흑기사|해골|스파토이|좀비|구울|버그베어|늑대인간|라이칸|장로|웅골리언트|셸로브|괴물 눈/.test(n),
     ranged:/궁수|장로|괴물 눈/.test(n)?6:0,spd:/슬라임|좀비|골렘/.test(n)?1100:/늑대|도베르만|비글|세퍼드|토끼/.test(n)?520:780,aspd:boss?1000:1300};}
 function spawnMon(sp){const st=mstat(sp.n);let x=sp.x,y=sp.y;const M=G.map;
   let ok=false;for(let k=0;k<40;k++){const tx=rnd(sp.box[0],sp.box[2]),ty=rnd(sp.box[1],sp.box[3]);if(M.walk(tx,ty)&&!inSafe(tx,ty)){x=tx;y=ty;ok=true;break;}}
@@ -1258,10 +1306,15 @@ function drawGroundItem(g,sx,sy){const d=ITEM(g.n);const bob=Math.sin(G.time/300
     ctx.fillStyle=col;ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(sx,sy-16+bob);ctx.lineTo(sx+7,sy-8+bob);ctx.lineTo(sx,sy+bob);ctx.lineTo(sx-7,sy-8+bob);ctx.closePath();ctx.fill();ctx.stroke();
     ctx.fillStyle='rgba(255,255,255,.6)';ctx.fillRect(sx-2,sy-12+bob,2,3);}
   if(G.hover===g||G.keys.Alt)label(itemName(g)+(g.q>1?' ('+fmt(g.q)+')':''),sx,sy-22,'#fff');}
+function dkAura(sx,sy,sz){const t=G.time;ctx.save();ctx.globalCompositeOperation='lighter';
+  const g=ctx.createRadialGradient(sx,sy,2,sx,sy,40);g.addColorStop(0,'rgba(90,230,205,.45)');g.addColorStop(1,'rgba(90,230,205,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(sx,sy,40,18,0,0,7);ctx.fill();
+  ctx.strokeStyle='rgba(140,250,230,.35)';ctx.lineWidth=1.2;ctx.beginPath();ctx.ellipse(sx,sy,30+Math.sin(t/300)*3,13,0,0,7);ctx.stroke();
+  for(let i=0;i<9;i++){const p=((t/1400)+i/9)%1,a=i*2.1+t/1600,x=sx+Math.cos(a)*(10+i%3*7),y=sy-p*sz*.9+Math.sin(a)*4;ctx.globalAlpha=(1-p)*.8;ctx.fillStyle='rgb(150,255,235)';ctx.beginPath();ctx.arc(x,y,1.6,0,7);ctx.fill();}
+  ctx.restore();}
 function drawPoly(n,a,b,cx,cy,name,dir,walking,atkT,me){const[x0,y0]=iso(a,b);const sx=x0-cx,sy=y0-cy+16;
   const arch=monArch(n),sc=(MSIZE[arch]||1)*1.05,sz=64*sc,d=dir==='W'||dir==='N'?'W':'E',f=walking?1+Math.floor(G.time/130)%3:0,atk=G.time-atkT<300;
   shadow(sx,sy,14*sc);const msp=monSprite(n,d,atk?2:f),mx=sx-sz/2+(atk?(d==='W'?-4:4):0),my=sy-sz*0.94;
-  ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(sx,sy,2,sx,sy,30);g.addColorStop(0,'rgba(200,30,40,.35)');g.addColorStop(1,'rgba(200,30,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(sx,sy,30,15,0,0,7);ctx.fill();ctx.restore();
+  if(arch==='dk')dkAura(sx,sy,sz);else{ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(sx,sy,2,sx,sy,30);g.addColorStop(0,'rgba(200,30,40,.35)');g.addColorStop(1,'rgba(200,30,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(sx,sy,30,15,0,0,7);ctx.fill();ctx.restore();}
   ctx.drawImage(msp,mx,my,sz,sz);if(me&&G.time-(P.hitT||-1e9)<110){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.5;ctx.drawImage(msp,mx,my,sz,sz);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}
   label(name,sx,my-8,me?'#ffd6a0':'#9fd3ff');}
 function drawMonE(m,a,b,cx,cy){const[x0,y0]=iso(a,b);const sx=x0-cx,sy=y0-cy+16;
@@ -1269,7 +1322,7 @@ function drawMonE(m,a,b,cx,cy){const[x0,y0]=iso(a,b);const sx=x0-cx,sy=y0-cy+16;
   const arch=monArch(m.n),sc=MSIZE[arch]||1,sz=64*sc;
   const walking=m.t<1,f=walking?1+Math.floor(G.time/130)%3:0;
   const atk=G.time-m.atkT<250;shadow(sx,sy,14*sc);
-  const msp=monSprite(m.n,m.dir,atk?2:f),mx=sx-sz/2+(atk?(m.dir==='W'?-4:4):0),my=sy-sz*0.94;ctx.drawImage(msp,mx,my,sz,sz);
+  const msp=monSprite(m.n,m.dir,atk?2:f),mx=sx-sz/2+(atk?(m.dir==='W'?-4:4):0),my=sy-sz*0.94;if(arch==='dk')dkAura(sx,sy,sz);ctx.drawImage(msp,mx,my,sz,sz);
   if(G.time-m.hitT<110){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.55;ctx.drawImage(msp,mx,my,sz,sz);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}
   const show=G.target===m||G.hover===m||G.time-m.hitT<4000||m.boss;
   const lc=m.boss?'#ff8a5a':m.lv>P.lv+5?'#ff7070':m.lv<P.lv-5?'#9a9a9a':'#ffffff';
