@@ -1459,4 +1459,120 @@ Q.push(['펠리컬',{
   if(mode==='skill'&&f>=2)for(let i=0;i<5;i++)B.ball(A(bt,[Math.sin(i*2)*1.5,i*2.2,-i*.6]),.7,'#a0d0ff',{alpha:.7,glow:'200,230,255'});}
 }]);
 
+
+// ======================= 179. 물의 대정령 =======================
+Q.push(['물의 대정령',{
+ detail(B,K){const{p,H,sh,bw,hr}=B.J,{mode,f,t}=B,j=J(B),fx='110,190,255',pu=.55+.4*Math.sin(t/220+f);
+  // 소용돌이 하체(겹친 물결 고리)
+  for(let i=0;i<6;i++){const z=H+1-i*3.4,R=(7.5-i*.9)*bw,ph=t/260+i*1.1+f*.8,pts=[];for(let k=0;k<=12;k++){const a=k/12*Math.PI*2+ph;pts.push([Math.cos(a)*R,Math.sin(a)*R*.8-i*.3,z+Math.sin(a*2+ph)*.6]);}B.line(pts,i%2?'rgba(200,235,255,.55)':'rgba(90,160,230,.6)',1.1-i*.1);}
+  // 몸통 물결 줄기·거품
+  for(let i=0;i<6;i++){const a=-1.4+i*.56,sw=Math.sin(t/300+i)*.15;B.line([SF(B,a,H,.4),SF(B,a+sw,H+6,.6),SF(B,a-sw,sh-2,.5),SF(B,a+.1,sh+3,.3)],i%2?'rgba(210,240,255,.55)':'rgba(60,130,210,.55)',.8);}
+  for(let i=0;i<8;i++){const ph=((t/900)+i/8+f*.1)%1;B.ball([Math.sin(i*2.7)*6*bw,Math.cos(i*1.9)*4,H-6+ph*(sh-H+12)],.5+(i%3)*.25,'#e8f8ff',{alpha:(1-ph)*.8,d:-.2});}
+  // 물 심장
+  B.ball(SF(B,0,sh-3,-1),2.2,'#d0f0ff',{glow:fx,alpha:.85,d:-.05});B.glow(SF(B,0,sh-3,0),3+pu*1.5,fx,.45);
+  // 어깨·팔의 물보라 고리
+  for(const jj of[j.R,j.L]){for(let i=0;i<4;i++){const a=t/200+i*1.6;B.ball(A(jj.sp,[Math.cos(a)*3,Math.sin(a)*3,2+Math.sin(a)*1]),.6,'#c8ecff',{alpha:.75,d:-.1});}
+    const pts=[];for(let k=0;k<=8;k++){const a=k/8*Math.PI*2+t/250;pts.push(A(M(jj.el,jj.h,.6),[Math.cos(a)*2.4,Math.sin(a)*2.4,0]));}B.line(pts,'rgba(200,235,255,.6)',.5);
+    for(let i=0;i<2;i++){const ph=((t/500)+i*.5)%1;B.ball(A(jj.h,[0,0,-1-ph*4]),.6*(1-ph)+.2,'#a8dcff',{alpha:1-ph,d:-.1});}}
+  // 파도 갈기 머리
+  for(let i=0;i<7;i++){const a=(i/6-.5)*2.4,w=Math.sin(t/240+i*1.3)*.2;const b=HP(B,Math.sin(a)*.8,-Math.cos(a)*.4,.6),c=HP(B,Math.sin(a)*1.2+w,-.8-Math.cos(a)*.5,1.4+Math.abs(Math.sin(i))*.4),e=HP(B,Math.sin(a)*1.5-w,-1.6,.5);
+    B.cap(b,c,hr*.34,i%2?'#8ac8ff':'#6aaae8',{w1:hr*.22,alpha:.85,d:.03});B.cap(c,e,hr*.22,'#c8ecff',{w1:hr*.05,alpha:.8,d:.03});B.ball(c,hr*.12,'#ffffff',{alpha:.7,d:.02});}
+  B.ball(HP(B,-.35,.5,.45),hr*.25,'#ffffff',{flat:1,alpha:.35,d:-.08});
+  if(mode==='skill'&&f>=1)for(let i=0;i<8;i++){const a=i/8*Math.PI*2+f*.5;B.ball([Math.cos(a)*(8+f*3),Math.sin(a)*(8+f*3),2+f],1,'#c8ecff',{alpha:.8,glow:fx});}
+  if(mode==='attack'&&f===1)for(const jj of[j.R,j.L])B.glow(A(jj.h,[0,2,0]),3,fx,.6);}
+}]);
+
+// ======================= 182. 킬러비 =======================
+Q.push(['킬러비',{
+ detail(B,K){const b=BJ(B),{mode,f,t}=B,{sp,hp,hr,bw}=b,ab=sp[0],th=sp[1],fx='255,220,80';
+  // 가슴 솜털
+  for(let i=0;i<10;i++){const a=i*2.4,el=Math.sin(i*1.3)*.8;const n=[Math.cos(a)*Math.cos(el),Math.sin(a)*Math.cos(el),Math.abs(Math.sin(el))+.1];const q=A(th.p,n,th.r*.85);B.cap(q,A(q,n,.9),.5,i%2?'#f0c840':'#b08818',{w1:.15,d:-.02});}
+  B.ball(A(th.p,[0,0,-th.r*.3]),th.r*.7,'#3a2a10',{sy:.7,alpha:.6,d:-.01});
+  // 배 마디 선·털
+  for(let i=0;i<4;i++){const y=ab.p[1]-ab.r*.7+i*ab.r*.45;const pts=[];for(let k=-3;k<=3;k++){const a=k*.45;pts.push([Math.sin(a)*ab.r*.98,y,ab.p[2]+Math.cos(a)*ab.r*.8]);}B.line(pts,'rgba(40,30,10,.55)',.3);}
+  // 날개 맥
+  const fl=Math.sin(t/60+f*2)*.6;for(const g of[-1,1])for(const[dy,len]of[[1,1],[-2,.85]]){const r0=[g*2,dy,b.h+1.5],e=[g*9*len,dy+3,b.h+5+fl*4],e2=[g*9*len*1.05,dy-2,b.h+4+fl*3];B.line([r0,M(e,e2,.3)],'rgba(90,80,60,.6)',.25);B.line([M(r0,e,.5),M(r0,e2,.6),e2],'rgba(90,80,60,.5)',.2);B.glow(M(e,e2),1.2,'230,245,255',.15);}
+  // 겹눈·더듬이·큰턱
+  for(const g of[-1,1]){B.ball(A(hp,[g*hr*.6,hr*.4,hr*.2]),hr*.42,'#2a1a10',{sy:1.2,d:-.04});B.ball(A(hp,[g*hr*.5,hr*.6,hr*.45]),hr*.12,'#ffffff',{flat:1,alpha:.5,d:-.06});
+    const a0=A(hp,[g*hr*.3,hr*.6,hr*.7]),a1=A(a0,[g*1,1,1.6]);B.cap(a0,a1,.4,'#1a1410',{w1:.3,d:-.05});B.cap(a1,A(a1,[g*.6,1.6,-.2]),.3,'#1a1410',{w1:.25,d:-.05});
+    B.cap(A(hp,[g*hr*.3,hr*.85,-hr*.3]),A(hp,[g*hr*(.1+(1-b.snap)*.15),hr*1.4,-hr*.5]),.5,'#5a3a10',{w1:.15,d:-.06});}
+  // 독침(길고 빛남)
+  {const a=[0,ab.p[1]-ab.r*.8,ab.p[2]],ex=(mode==='attack'||mode==='skill')?2:0,bb=A(a,[0,-4-ex,-2.2-ex*.3]);B.cap(a,bb,.8,'#2a2010',{w1:.1,d:.02});B.glow(bb,1.2,'200,255,90',.4+(ex?.4:0));
+    if(mode==='skill'&&f===2)for(let i=1;i<4;i++)B.ball(A(bb,[0,-i*1.6,-i*.6]),.45,'#d0ff60',{glow:'200,255,90'});}
+  // 다리 마디 털
+  for(const lg of b.legs){B.ball(lg.knee,.55,'#2a2010',{d:-.02});B.cap(M(lg.knee,lg.ft,.4),A(M(lg.knee,lg.ft,.4),[lg.sg*.5,0,-.6]),.3,'#c09020',{w1:.1,d:-.02});}
+  for(let i=0;i<3;i++){const ph=((t/400)+i/3)%1;B.glow([Math.sin(i*2+t/300)*6,Math.cos(i*1.7)*4,b.h-2-ph*4],.8,'255,240,180',(1-ph)*.2);}}
+}]);
+
+// ======================= 185. 가디언 아머 =======================
+Q.push(['가디언 아머',{
+ detail(B,K){const{p,H,sh,bw,hr}=B.J,{mode,f,t}=B,j=J(B),gd='#b8a060',lt='#e8d8a0',dk='#6a5a30',fx='255,230,150',pu=.55+.4*Math.sin(t/240+f);
+  // 흉갑: 중앙 능선·문장(태양)·리벳
+  B.poly([SF(B,-.9,sh+2,.8),SF(B,.9,sh+2,.8),SF(B,.75,sh-6,1),SF(B,0,sh-8.5,1.2),SF(B,-.75,sh-6,1)],gd,{grad:1,edge:dk,ew:.5,d:-.08});
+  B.line([SF(B,0,sh+2,1.3),SF(B,0,sh-8,1.5)],lt,.5);
+  {const c=SF(B,0,sh-2.5,1.6);B.ball(c,1.6,'#f0e0a0',{d:-.12});for(let i=0;i<8;i++){const a=i/8*Math.PI*2;B.cap(A(c,[Math.cos(a)*1.6,0,Math.sin(a)*1.6]),A(c,[Math.cos(a)*2.8,0,Math.sin(a)*2.8]),.5,'#f0e0a0',{w1:.1,d:-.12});}B.glow(c,2+pu,fx,.4);}
+  rivets(B,[SF(B,-.7,sh+1,1.2),SF(B,.7,sh+1,1.2),SF(B,-.6,sh-5,1.3),SF(B,.6,sh-5,1.3)],lt,.45);
+  // 복부 겹판·허리 미늘(태싯)
+  for(let i=0;i<3;i++)B.cap(SF(B,-1,H+4-i*1.6,.8),SF(B,1,H+4-i*1.6,.8),1.5,i%2?T(gd,-.12):gd,{d:-.07});
+  for(const a of[-.9,-.3,.3,.9,2.4,3.14,-2.4])B.poly([SF(B,a-.25,H+1.5,1),SF(B,a+.25,H+1.5,1),SF(B,a+.22,H-4,1.6),SF(B,a-.22,H-4,1.6)],T(gd,-.08),{grad:1,edge:dk,ew:.35,d:-.06});
+  // 등: 흰 망토 짧게
+  B.poly([SF(B,2.4,sh,.5),SF(B,3.9,sh,.5),SF(B,3.9,H-6-p.cape*.3,1.5+p.cape*.4),SF(B,2.4,H-6-p.cape*.3,1.5+p.cape*.4)],'#e8e8f0',{grad:1,d:.05});
+  // 팔다리 판금
+  for(const jj of[j.R,j.L]){pauldron(B,jj,gd,bw,{rivet:lt,s:1.05});B.cap(A(jj.sp,[jj.sg*1.5,0,4.2]),A(jj.sp,[jj.sg*3.6,-.3,4.6]),1,lt,{d:-.1});
+    bracer(B,jj,gd,4.2*bw,{strap:dk,rivet:lt});B.ball(jj.el,1.8,lt,{d:-.06});
+    greave(B,jj,gd,5.4*bw,{knee:lt,strap:dk});B.ball(A(jj.fp,[0,1.6,-.2]),2.1,T(gd,-.1),{sy:.7,d:-.06});}
+  // 투구: 면갑 숨구멍·볏 깃털·뺨 보호대
+  B.cap(HP(B,0,.4,1.15),HP(B,0,-.9,.9),hr*.3,'#e8e8f0',{w1:hr*.12,d:.02});for(let i=0;i<5;i++)B.cap(HP(B,0,.5-i*.32,1.2+Math.sin(i)*.05),HP(B,0,.3-i*.38,1.75-i*.12),hr*.16,i%2?'#ffffff':'#d8d8e8',{w1:hr*.05,d:.01});
+  B.cap(HP(B,0,1.02,.7),HP(B,0,1.08,-.4),hr*.12,lt,{d:-.12});for(const g of[-1,1]){B.ball(HP(B,.62*g,.62,-.3),hr*.32,T(gd,-.08),{sy:.8,d:-.08});for(let i=0;i<3;i++)B.ball(HP(B,.28*g,.98,-.25-i*.18),hr*.05,'#141010',{flat:1,d:-.14});}
+  B.cap(HP(B,-1,.2,.05),HP(B,1,.2,.05),hr*.14,lt,{d:-.06});
+  // 성창·방패
+  spearHQ(B,'#f0f0f8','#c0a050','#e8e8f0');{const pt=k=>A(p.hR,p.dS,k);B.glow(pt(26),2+pu,fx,.45);}
+  shieldHQ(B,lt,'cross',{ec:'#f0e8c0',boss:lt});
+  if(mode==='buff'||mode==='skill')for(let i=0;i<6;i++){const ph=((t/1000)+i/6)%1;B.glow([Math.cos(i*2.3)*8,Math.sin(i*1.9)*5,4+ph*36],1.2,fx,(1-ph)*.6);}}
+}]);
+
+// ======================= 188. 자이언트 =======================
+Q.push(['자이언트',{
+ detail(B,K){W2_inh(B,K,'오우거');const{p,H,sh,bw,hr}=B.J,{mode,f,t}=B,j=J(B),hc='#5a3a20';
+  // 긴 머리칼·땋은 수염(구슬 장식)
+  for(let i=0;i<7;i++){const a=(i/6-.5)*2.6;B.cap(HP(B,Math.sin(a)*.9,-Math.cos(a)*.5-.2,.45),HP(B,Math.sin(a)*1.1,-Math.cos(a)*.6-.8,-1.6-Math.abs(Math.sin(i*1.7))*.5),hr*.3,i%2?hc:T(hc,-.2),{w1:hr*.12,d:.05});}
+  for(const g of[-1,0,1]){const a=HP(B,.3*g,.95,-.75),b=HP(B,.32*g,1,-1.9);for(let i=0;i<4;i++)B.ball(M(a,b,i/3),hr*(.16-i*.015),i%2?hc:T(hc,.12),{d:-.12});B.ball(A(b,[0,0,-.6]),hr*.12,'#c0a050',{d:-.13});}
+  B.cap(HP(B,-.5,.9,-.3),HP(B,.5,.9,-.3),hr*.22,hc,{d:-.1});
+  // 털 망토(어깨 둘레)·뼈 목걸이
+  for(let i=0;i<11;i++){const a=1.4+i*.32;const c=SF(B,a,sh+1.5,.6);B.cap(c,A(c,[Math.sin(a)*.8,Math.cos(a)*.6-.4,-4.5-Math.abs(Math.sin(i*2.1))*2]),2.4,i%2?'#6a5038':'#4a3424',{w1:1.2,d:.02});}
+  for(let i=0;i<7;i++){const a=(i/6-.5)*1.6;B.cap(SF(B,a,sh+1.4,1),SF(B,a,sh-.6,1.3),.8,'#e8e0c8',{w1:.4,d:-.1});}
+  // 이마 띠
+  B.cap(HP(B,-1,.2,.45),HP(B,1,.2,.45),hr*.15,'#3a2414',{d:-.05});B.ball(HP(B,0,.97,.5),hr*.12,'#5a8aa0',{d:-.08});}
+}]);
+
+// ======================= 191. 블루 하피 =======================
+const W2_blueRC=W2_hueTo(270,360,215,1.05,1.02);
+Q.push(['블루 하피',{
+ detail(B,K){W2_inh(W2_RC(B,W2_blueRC),K,'하피');const{p,H,sh,bw,hr}=B.J,{mode,f,t}=B,fx='140,190,255';
+  // 깃털 끝 흰 줄무늬·푸른 깃 장식
+  for(let i=0;i<3;i++)B.cap(HP(B,(i-1)*.25,-.5,1),HP(B,(i-1)*.5,-1.4,2.2-Math.abs(i-1)*.3),hr*.14,i%2?'#e8f0ff':'#6aa0e8',{w1:hr*.04,d:.02});
+  for(const g of[-1,1]){const r0=[5*g*bw,-3,sh-2],fl=Math.sin(f*1.6+(mode==='run'?1:0)+t/250)*4+(mode==='buff'?6:0),b=[24*g*bw,-10,sh-2+fl],c=[16*g*bw,-7,H-2+fl*.5];for(let i=0;i<4;i++){const q=M(b,c,i/3);B.cap(q,A(q,[g*.8,-.4,-1.6]),.6,'#e8f0ff',{w1:.2,d:.4});}}
+  // 바람 기운
+  if(mode==='skill'||mode==='buff'||mode==='run')for(let i=0;i<3;i++){const a=t/220+i*2.1+f;B.arc([[Math.cos(a)*9,Math.sin(a)*9,6+i*6],[Math.cos(a+.8)*11,Math.sin(a+.8)*11,8+i*6],[Math.cos(a+1.6)*9,Math.sin(a+1.6)*9,10+i*6]],fx,.6);}}
+}]);
+
+// ======================= 194. 유니 드래곤 =======================
+const W2_uniRC=([h,s,l])=>(h<45||h>340)&&s>.35?[215,s*.6,Math.min(.85,l*1.25)]:[h,s,l];
+Q.push(['유니 드래곤',{
+ detail(B,K){W2_inh(W2_RC(B,W2_uniRC),K,'드레이크');const q=QJ(B),{mode,f,t}=B,hh=q.heads[0],{hd,r,fwd,tip,sd}=hh,up=[0,0,1],fx='190,210,255',pu=.55+.4*Math.sin(t/260+f);
+  // 나선 뿔(고리 마디)·뿔 빛
+  const h0=A(A(hd,fwd,r*.5),up,r*.7),h1=A(A(hd,fwd,r*1.3),up,r*2.4);for(let i=0;i<5;i++){const c=M(h0,h1,.12+i*.18);B.ball(c,r*(.27-i*.04),i%2?'#f8e8a0':'#c8a840',{sy:.6,d:-.12});}
+  B.glow(h1,2+pu*1.5,'255,240,180',.55);
+  // 흰 갈기(목 뒤로 흩날림)
+  for(let i=0;i<9;i++){const c=M(A(hd,up,r*.8),A(hh.neck,up,3),i/8),w=Math.sin(t/200+i*1.4+f)*.6;B.cap(c,A(c,[w+(i%2?.8:-.8),-3.2,1.2-(i%3)*.6]),1.6,i%2?'#ffffff':'#d8e4ff',{w1:.2,d:.02});}
+  // 수염 촉수·눈두덩
+  for(const g of[-1,1]){const a=A(A(tip,sd,g*r*.35),up,-r*.1);B.line([a,A(a,[g*1.2,-1,-1.5]),A(a,[g*1.6,-3+Math.sin(t/300)*.4,-2.4])],'#e8f0ff',.45);}
+  quadFace(B,hh,q.jaw,{brow:'#b8c4e0'});
+  // 꼬리 끝 깃털 술
+  {const e=q.tail[q.tail.length-1];for(let i=0;i<5;i++)B.cap(e,A(e,[(i-2)*.9,-3,(i%2)*1-.5]),1.1,i%2?'#ffffff':'#c8d8ff',{w1:.2,d:.02});}
+  // 성스러운 빛 입자
+  for(let i=0;i<5;i++){const ph=((t/1200)+i/5+f*.06)%1;B.glow([Math.sin(i*2.3)*q.R*1.6,Math.cos(i*1.7)*q.L*.5,q.h*.3+ph*24],1.2*(1-ph)+.3,fx,(1-ph)*.55);}
+  if(mode==='skill'&&f>=1)B.glow(h1,3+f*1.5,'255,250,220',.7);}
+}]);
+
 })();
