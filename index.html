@@ -330,7 +330,7 @@ const WKIND={'한손검':'sword','둔기':'blunt','창':'spear','활':'bow','지
 // ---------- monsters ----------
 function monArch(n){
   const has=(...k)=>k.some(s=>n.includes(s));
-  if(has('바포메트'))return'demon';if(has('커츠','흑기사'))return'dknight';
+  if(has('바포메트'))return'demon';if(has('커츠','흑기사','데스나이트'))return'dknight';
   if(has('개구리'))return'frog';if(has('토끼'))return'rabbit';if(has('슬라임'))return'slime';
   if(has('늑대인간','라이칸'))return'wolfman';if(has('늑대','도베르만','비글','세퍼드'))return'dog';
   if(has('해골','스파토이'))return'skel';if(has('좀비','구울'))return'zombie';if(has('골렘'))return'golem';
@@ -338,7 +338,7 @@ function monArch(n){
   if(has('버그베어'))return'bigman';return'goblin';
 }
 function hashc(s){let h=0;for(const ch of s)h=(h*31+ch.charCodeAt(0))|0;return Math.abs(h);}
-function monColor(n){const pal={'고블린':'#7a9a3a','오크':'#6b7a3a','오크 궁수':'#7d6a3a','오크 전사':'#5a6a2c','코볼트':'#a0603a','난쟁이':'#b07a50','난쟁이족 전사':'#8a5a3a','놀':'#9a7a4a','홉고블린':'#a05030','버그베어':'#7a5232','늑대':'#7d7d86','도베르만':'#2e2622','비글':'#c49a64','세퍼드':'#8a6a42','늑대인간':'#5a4a40','라이칸스로프':'#3c3a44','개구리':'#5aa04a','토끼':'#e8e0d6','슬라임':'#6ad0a0','좀비':'#7a9a7a','구울':'#8a8a6a','해골':'#e6e0cc','스파토이':'#d6c4a4','돌 골렘':'#8a8478','괴물 눈':'#c06080','셸로브':'#3a2e3e','웅골리언트':'#2a2030','장로':'#5a6a9a','흑기사':'#2a2a34','커츠':'#5a1a1a','바포메트':'#7a2a1a'};
+function monColor(n){const pal={'데스나이트':'#4a1a20','고블린':'#7a9a3a','오크':'#6b7a3a','오크 궁수':'#7d6a3a','오크 전사':'#5a6a2c','코볼트':'#a0603a','난쟁이':'#b07a50','난쟁이족 전사':'#8a5a3a','놀':'#9a7a4a','홉고블린':'#a05030','버그베어':'#7a5232','늑대':'#7d7d86','도베르만':'#2e2622','비글':'#c49a64','세퍼드':'#8a6a42','늑대인간':'#5a4a40','라이칸스로프':'#3c3a44','개구리':'#5aa04a','토끼':'#e8e0d6','슬라임':'#6ad0a0','좀비':'#7a9a7a','구울':'#8a8a6a','해골':'#e6e0cc','스파토이':'#d6c4a4','돌 골렘':'#8a8478','괴물 눈':'#c06080','셸로브':'#3a2e3e','웅골리언트':'#2a2030','장로':'#5a6a9a','흑기사':'#2a2a34','커츠':'#5a1a1a','바포메트':'#7a2a1a'};
   const k=Object.keys(pal).find(k=>n.startsWith(k));return k?pal[k]:'hsl('+hashc(n)%360+',35%,45%)';}
 const MSIZE={frog:.6,rabbit:.6,slime:.7,dog:.85,eye:.8,goblin:.9,skel:1,zombie:1,wolfman:1.15,bigman:1.25,golem:1.4,spider:1.2,elder:1,dknight:1.1,demon:1.9};
 // box 64x64 feet at (32,60)
@@ -880,13 +880,15 @@ const SPELLS={
   rtn:{name:'리턴 투 네이쳐',mp:30,cls:['elf'],lv:40,kind:'atk',el:'땅',range:8,dmg:[10,20],spm:2,icon:'leaf',book:'정령의 수정 (리턴 투 네이쳐)',eff:'HP가 30% 이하인 몬스터(보스 제외)를 자연으로 돌려보내 즉시 처치합니다.',desc:'생명을 자연의 품으로 돌려보냅니다.'},
   brfire:{name:'브레스 오브 파이어',mp:30,cls:['elf'],lv:45,kind:'atk',el:'불',range:6,aoe:2,dmg:[28,50],spm:3,icon:'fire',book:'정령의 수정 (브레스 오브 파이어)',desc:'불의 정령이 화염을 내뿜습니다.'},
 };
+const POLY={'데스나이트':{lv:52,skill:true,eq:'전체',spd:{'이동':667,'주먹':650,'한손검':683,'도끼':767,'지팡이':683,'단검':650,'양손검':767,'공격 마법':1083,'버프 마법':1083}}};
+function polyOf(p){return p&&p.poly&&POLY[p.poly.n]?POLY[p.poly.n]:null;}
 const BOOK2SK={};for(const k in SPELLS)if(SPELLS[k].book)BOOK2SK[SPELLS[k].book]=k;
 const SK_KIND={atk:'공격',heal:'회복',buff:'강화',debuff:'약화',util:'기타'};
 const SK_COL={heal:'140,255,150',bolt:'120,200,255',dark:'150,80,220',bash:'255,110,90',dex:'120,230,160',vamp:'220,60,90',b2s:'230,70,70',aura:'255,215,110',slow:'140,150,255',weak:'190,110,210',jail:'205,160,90',fire:'255,140,60',tri:'240,230,200',wbrk:'230,140,80',cmag:'200,200,255',light:'170,210,255',bless:'255,240,170',ghea:'150,255,170',fog:'200,180,255',erup:'255,100,40',bers:'255,80,60',sun:'255,230,120',redu:'200,210,230',bounce:'255,200,120',tame:'140,230,200',quake:'210,170,100',summ:'190,140,255',stun:'255,240,120',solid:'180,200,240',rtn:'120,230,120',brfire:'255,120,40'};
 function skillKnown(k){const S=SPELLS[k];if(!S||!P)return false;if(!S.cls.includes(P.cls)||P.lv<S.lv)return false;return !S.book||(S.auto&&S.auto.includes(P.cls))||(P.skills||[]).includes(k);}
 // 상태: ok 사용 가능 · lv 레벨 부족(자동 습득) · bk 마법서 필요 · cl 다른 클래스
 function skillState(k){const S=SPELLS[k];if(!S.cls.includes(P.cls))return'cl';if(skillKnown(k))return'ok';const autoL=!S.book||(S.auto&&S.auto.includes(P.cls));if(autoL)return'lv';return(P.skills||[]).includes(k)?'lv':'bk';}
-function skillCd(S){return(S.kind==='atk'||S.kind==='debuff')?(GD.speed[P.cls]['공격 마법']||1000):(GD.speed[P.cls]['버프 마법']||1000);}
+function skillCd(S){const sp=(polyOf(P)||{}).spd||GD.speed[P.cls];return(S.kind==='atk'||S.kind==='debuff')?(sp['공격 마법']||GD.speed[P.cls]['공격 마법']||1000):(sp['버프 마법']||GD.speed[P.cls]['버프 마법']||1000);}
 function skillDmg(S,C){const b=S.spm?C.SP*S.spm:0,i=S.kind==='atk'?fx('INT→마법 대미지',C.s.INT):0;return[Math.round(S.dmg[0]+b+i),Math.round(S.dmg[1]+b+i)];}
 function skillHeal(S,C){return[Math.round(S.heal[0]+C.SP*S.spm),Math.round(S.heal[1]+C.SP*S.spm)];}
 function dropsOf(book){const seen=new Map();for(const[m,l]of Object.entries(GD.drops||{}))if(l.includes(book)){const n=m.split(' (')[0];if(!seen.has(n))seen.set(n,(GD.mons[m]||GD.mons[n]||{}).lv);}return[...seen].sort((a,b)=>(a[1]||0)-(b[1]||0));}
@@ -934,6 +936,7 @@ function calc(){
     wsub:wd?wd.sub:null,wname:w?w.n:null,ranged:wd&&wd.sub==='활',range:wd&&wd.sub==='활'?8:(wd&&wd.sub==='창'?2:1)};
   const col={'한손검':'한손검','둔기':'도끼','창':'창','활':'활','지팡이':'지팡이','단검':'단검','양손검':'양손검'}[r.wsub]||'주먹';
   r.aspd=GD.speed[P.cls][col]||1000;r.mspd=(GD.speed[P.cls]['이동']||667)/2.5;
+  {const PO=polyOf(P);if(PO){r.aspd=PO.spd[col]||r.aspd;r.mspd=(PO.spd['이동']||667)/2.5;}}
   if(b.haste>now){r.aspd*=0.75;r.mspd*=0.7;}
   if(b.pearl>now){r.aspd*=0.875;r.mspd*=0.875;} // 드래곤의 진주(3단 가속)
   if(b.wafer>now)r.aspd*=0.75; // 엘븐 와퍼(요정 전용 공격속도 증가)
@@ -1051,7 +1054,7 @@ function playerHit(m,d,magic){const C=calc();if(G.dead)return;
   if(Math.random()>ch){addFloat(P.x,P.y,'MISS','#9cf',1);return;}
   d=Math.max(1,d-Math.max(0,Math.floor(-C.AC/6))-(G.buffs.redu>G.time?2:0));P.hp-=d;addFloat(P.x,P.y,d,'#ff6060',1);P.hitT=G.time;
   if(P.hp<=0){P.hp=0;die();}refreshBars();}
-function die(){G.dead=true;const loss=Math.floor(expNeed(P.lv)*.05);P.exp=Math.max(0,P.exp-loss);$('#death').classList.remove('hidden');G.target=null;G.path=null;log('사망했습니다. 경험치 '+fmt(loss)+' 손실','c-bad');}
+function die(){G.dead=true;if(P.poly){log('「'+P.poly.n+'」 변신이 풀렸습니다.','c-sys');P.poly=null;G.saveDirty=true;pushPresence(true);}const loss=Math.floor(expNeed(P.lv)*.05);P.exp=Math.max(0,P.exp-loss);$('#death').classList.remove('hidden');G.target=null;G.path=null;log('사망했습니다. 경험치 '+fmt(loss)+' 손실','c-bad');}
 function revive(){G.dead=false;P.hp=Math.ceil(P.mhp*.5);P.mp=Math.ceil(P.mmp*.5);$('#death').classList.add('hidden');enterMap(0,32600,32936);refreshUI();}
 
 // ---------- monster AI ----------
@@ -1153,7 +1156,7 @@ function updSkills(){const now=G.time;
     if(m&&Math.max(Math.abs(m.x-P.x),Math.abs(m.y-P.y))<=8){G.summT=now;const C=calc(),d=rnd(8,16)+C.SP*2;G.fx.push({k:'orb',col:SK_COL.summ,x0:P.x,y0:P.y,x1:m.x,y1:m.y,t0:now,dur:260,cb:()=>{if(!m.dead)damageMon(m,d,'#c9f');}});}}
   if(now-(G.buffUiT||0)<500)return;G.buffUiT=now;G.bOn=G.bOn||{};
   const L=[];for(const k in SPELLS){if(k==='bash')continue;const on=G.buffs[k]>now;if(G.bOn[k]&&!on)log('「'+SPELLS[k].name+'」 효과가 사라졌습니다.','c-sys');G.bOn[k]=on;if(on)L.push([SPELLS[k].name,G.buffs[k]-now]);}
-  if(G.buffs.bash)L.push(['강타 준비',0]);if(G.buffs.haste>now)L.push(['가속',G.buffs.haste-now]);if(G.buffs.pearl>now)L.push(['드래곤의 진주',G.buffs.pearl-now]);if(G.buffs.wafer>now)L.push(['엘븐 와퍼',G.buffs.wafer-now]);
+  if(polyOf(P))L.push(['변신: '+P.poly.n+' (사망 시 해제)',0]);if(G.buffs.bash)L.push(['강타 준비',0]);if(G.buffs.haste>now)L.push(['가속',G.buffs.haste-now]);if(G.buffs.pearl>now)L.push(['드래곤의 진주',G.buffs.pearl-now]);if(G.buffs.wafer>now)L.push(['엘븐 와퍼',G.buffs.wafer-now]);
   const h=L.map(([n,t])=>'<span>'+esc(n)+(t?' '+(t>=60000?Math.ceil(t/60000)+'분':Math.ceil(t/1000)+'초'):'')+'</span>').join('');const el=$('#buffs');if(el&&el._h!==h){el._h=h;el.innerHTML=h;}}
 function drawSummon(cx,cy){if(!(G.buffs.summ>G.time))return;const[px,py]=ePos(P),[a,b]=iso(px,py),t=G.time/600;const sx=a-cx+Math.cos(t)*30,sy=b-cy-34+Math.sin(t)*10+Math.sin(t*3)*3;
   ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(sx,sy,0,sx,sy,15);g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.35,'rgba(190,140,255,.85)');g.addColorStop(1,'rgba(190,140,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(sx,sy,15,0,7);ctx.fill();
@@ -1219,7 +1222,7 @@ function render(){
       if(G.hover===n){ctx.strokeStyle='rgba(243,221,156,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(sx,sy,18,9,0,0,7);ctx.stroke();}}
     else if(k==='mon')drawMonE(D[3],D[4],D[5],cx,cy);
     else if(k==='peer')drawPeer(D[3],cx,cy);
-    else if(k==='me')drawPlayer(P,px,py,cx,cy,true);}
+    else if(k==='me'){if(polyOf(P))drawPoly(P.poly.n,px,py,cx,cy,P.name+' Lv.'+P.lv,P.dir,P.t<1,P.atkT,true);else drawPlayer(P,px,py,cx,cy,true);}}
   // labels (island landmarks)
   if(!M.dark)for(const l of M.labels){const[a,b]=iso(l.x,l.y);const sx=a-cx,sy=b-cy;if(sx<-100||sx>W+100||sy<-50||sy>H+50)continue;ctx.font='bold 13px "Nanum Myeongjo",serif';ctx.textAlign='center';ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillText(l.name,sx+1,sy-99);ctx.fillStyle='rgba(255,240,200,.75)';ctx.fillText(l.name,sx,sy-100);}
   const _t2=performance.now();drawFx(cx,cy);drawSummon(cx,cy);
@@ -1246,6 +1249,12 @@ function drawGroundItem(g,sx,sy){const d=ITEM(g.n);const bob=Math.sin(G.time/300
     ctx.fillStyle=col;ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(sx,sy-16+bob);ctx.lineTo(sx+7,sy-8+bob);ctx.lineTo(sx,sy+bob);ctx.lineTo(sx-7,sy-8+bob);ctx.closePath();ctx.fill();ctx.stroke();
     ctx.fillStyle='rgba(255,255,255,.6)';ctx.fillRect(sx-2,sy-12+bob,2,3);}
   if(G.hover===g||G.keys.Alt)label(itemName(g)+(g.q>1?' ('+fmt(g.q)+')':''),sx,sy-22,'#fff');}
+function drawPoly(n,a,b,cx,cy,name,dir,walking,atkT,me){const[x0,y0]=iso(a,b);const sx=x0-cx,sy=y0-cy+16;
+  const arch=monArch(n),sc=(MSIZE[arch]||1)*1.05,sz=64*sc,d=dir==='W'||dir==='N'?'W':'E',f=walking?1+Math.floor(G.time/130)%3:0,atk=G.time-atkT<300;
+  shadow(sx,sy,14*sc);const msp=monSprite(n,d,atk?2:f),mx=sx-sz/2+(atk?(d==='W'?-4:4):0),my=sy-sz*0.94;
+  ctx.save();ctx.globalCompositeOperation='lighter';const g=ctx.createRadialGradient(sx,sy,2,sx,sy,30);g.addColorStop(0,'rgba(200,30,40,.35)');g.addColorStop(1,'rgba(200,30,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(sx,sy,30,15,0,0,7);ctx.fill();ctx.restore();
+  ctx.drawImage(msp,mx,my,sz,sz);if(me&&G.time-(P.hitT||-1e9)<110){ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.5;ctx.drawImage(msp,mx,my,sz,sz);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}
+  label(name,sx,my-8,me?'#ffd6a0':'#9fd3ff');}
 function drawMonE(m,a,b,cx,cy){const[x0,y0]=iso(a,b);const sx=x0-cx,sy=y0-cy+16;
   if(m.dummy){shadow(sx,sy,12);ctx.strokeStyle='#6a4a22';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx,sy-50);ctx.moveTo(sx-18,sy-36);ctx.lineTo(sx+18,sy-36);ctx.stroke();ctx.fillStyle='#d8c070';ctx.beginPath();ctx.arc(sx,sy-56,9,0,7);ctx.fill();ctx.fillStyle='#8a6a2a';ctx.fillRect(sx-8,sy-36,16,22);label('허수아비',sx,sy-72,'#ddd');return;}
   const arch=monArch(m.n),sc=MSIZE[arch]||1,sz=64*sc;
@@ -1346,7 +1355,7 @@ function drawPlayer(p,a,b,cx,cy,me,look,atkT,wn,ak,aim,acol){const[x0,y0]=iso(a,
   const nm=me?P.name:p.n;label(nm,sx,sy-104,me?'#9fe39a':'#9fd3ff');
   if(me){if(G.buffs.aura>G.time){ctx.strokeStyle='rgba(255,210,100,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(sx,sy,20,10,0,0,7);ctx.stroke();}}
   else hpbar(sx,sy-100,(p.hp||100)/100,'#3c3');}
-function drawPeer(pe,cx,cy){drawPlayer({dir:pe.d,face:pe.fa,am:pe.am,rn:pe.rn,n:pe.n+' Lv.'+pe.lv,walking:pe.walking,hp:pe.hp,sh:pe.sh},pe.rx,pe.ry,cx,cy,false,LOOKS[pe.lk]?pe.lk:'kM',pe.at?pe.atLocal:-9999,pe.w,pe.ak,pe.aa,pe.ac);}
+function drawPeer(pe,cx,cy){if(pe.pp&&POLY[pe.pp]){drawPoly(pe.pp,pe.rx,pe.ry,cx,cy,pe.n+' Lv.'+pe.lv,pe.d,pe.walking,pe.at?pe.atLocal:-9999,false);return;}drawPlayer({dir:pe.d,face:pe.fa,am:pe.am,rn:pe.rn,n:pe.n+' Lv.'+pe.lv,walking:pe.walking,hp:pe.hp,sh:pe.sh},pe.rx,pe.ry,cx,cy,false,LOOKS[pe.lk]?pe.lk:'kM',pe.at?pe.atLocal:-9999,pe.w,pe.ak,pe.aa,pe.ac);}
 function drawFx(cx,cy){const now=G.time;G.fx=G.fx.filter(f=>{const k=(now-f.t0)/f.dur;if(k<0)return true;if(k>=1){if(f.cb)f.cb();return false;}
   const[a0,b0]=iso(f.x0,f.y0),[a1,b1]=iso(f.x1,f.y1);const x=a0+(a1-a0)*k-cx,y=b0+(b1-b0)*k-cy-20;
   if(f.k==='arrow'){const ang=Math.atan2(b1-b0,a1-a0);ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.strokeStyle='#f0e0c0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-12,0);ctx.lineTo(4,0);ctx.stroke();ctx.fillStyle='#ddd';ctx.beginPath();ctx.moveTo(7,0);ctx.lineTo(2,-3);ctx.lineTo(2,3);ctx.fill();ctx.restore();}
@@ -1774,7 +1783,7 @@ function initRoom(){if(CHAN||!SESSION)return;
     for(const key in st){if(key.endsWith(':'+MY_NONCE))continue;const pr=st[key][0]||{};if(!pr.n)continue;seen.add(key);
       let o=G.peers.get(key);if(!o){o={rx:+pr.x,ry:+pr.y};G.peers.set(key,o);}
       Object.assign(o,{n:String(pr.n).slice(0,12),lk:pr.lk,lv:pr.lv|0,m:pr.m,x:+pr.x,y:+pr.y,d:['S','N','E','W'].includes(pr.d)?pr.d:'S',hp:Math.max(0,Math.min(100,+pr.hp||100)),w:typeof pr.w==='string'?pr.w:null,sh:!!pr.sh});
-      o.fa=[0,45,90,135,180,225,270,315].includes(pr.fa)?pr.fa:null;o.am=['attack','buff','skill'].includes(pr.am)?pr.am:'attack';o.rn=!!pr.rn;o.ak=['m','b','c'].includes(pr.ak)?pr.ak:'m';o.aa=typeof pr.aa==='number'&&isFinite(pr.aa)?pr.aa:null;o.ac=CAST_COL[pr.ac]?pr.ac:null;
+      o.fa=[0,45,90,135,180,225,270,315].includes(pr.fa)?pr.fa:null;o.am=['attack','buff','skill'].includes(pr.am)?pr.am:'attack';o.rn=!!pr.rn;o.ak=['m','b','c'].includes(pr.ak)?pr.ak:'m';o.aa=typeof pr.aa==='number'&&isFinite(pr.aa)?pr.aa:null;o.ac=CAST_COL[pr.ac]?pr.ac:null;o.pp=typeof pr.pp==='string'&&POLY[pr.pp]?pr.pp:null;
       if(pr.at&&pr.at!==o.at){o.at=pr.at;o.atLocal=G.time;}}
     for(const k of [...G.peers.keys()])if(!seen.has(k))G.peers.delete(k);renderOnline();});
   CHAN.on('broadcast',{event:'chat'},({payload:d})=>{if(!d||typeof d.t!=='string')return;if(d.id&&SENT.has(d.id))return;log(String(d.n||'?').slice(0,12)+': '+d.t.slice(0,80),d.u===SESSION.user.id?'c-chat':'c-peer');});
@@ -1786,7 +1795,7 @@ let reconnT=0;function reconnectRoom(){if(reconnT)return;reconnT=setTimeout(()=>
 setInterval(()=>{if(SESSION&&P&&(!CHAN||(CHAN.state!=='joined'&&CHAN.state!=='joining')))reconnectRoom();else if(CHAN&&CHAN.state==='joined')pushPresence(true);},5000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&SESSION&&P){if(!CHAN||CHAN.state!=='joined')reconnectRoom();else pushPresence(true);}});
 function pushPresence(force){if(!CHAN||!P)return;const now=performance.now();if(!force&&now-lastPres<250)return;
-  const o={n:P.name,lk:P.look,lv:P.lv,m:P.map,x:P.x,y:P.y,d:P.dir||'S',fa:P.face,hp:Math.round(P.hp/Math.max(1,P.mhp)*100),w:(eqItem('weapon')||{}).n||null,sh:!!P.eq.shield,at:P.atkT?Math.floor(P.atkT):0,ak:P.atkK||'m',aa:P.aimA!=null?Math.round(P.aimA*100)/100:null,ac:P.castK||null,am:P.atkM||'attack',rn:!!(window.ReclainChars&&moveSpeedPx(P._mspd||267)>=ReclainChars.MOTION.runSpeed)};
+  const o={n:P.name,lk:P.look,pp:polyOf(P)?P.poly.n:null,lv:P.lv,m:P.map,x:P.x,y:P.y,d:P.dir||'S',fa:P.face,hp:Math.round(P.hp/Math.max(1,P.mhp)*100),w:(eqItem('weapon')||{}).n||null,sh:!!P.eq.shield,at:P.atkT?Math.floor(P.atkT):0,ak:P.atkK||'m',aa:P.aimA!=null?Math.round(P.aimA*100)/100:null,ac:P.castK||null,am:P.atkM||'attack',rn:!!(window.ReclainChars&&moveSpeedPx(P._mspd||267)>=ReclainChars.MOTION.runSpeed)};
   const sig=JSON.stringify(o);if(sig===lastPresSig&&!force)return;lastPres=now;lastPresSig=sig;CHAN.track(o).catch(()=>{});}
 function renderOnline(){const el=$('#online');const list=[...G.peers.values()];if(!P){el.classList.add('hidden');return;}el.classList.remove('hidden');
   el.innerHTML='<b style="color:#f3dd9c">접속 중 '+(list.length+1)+'명</b><br>'+[P.name+' (나)',...list.map(p=>esc(p.n)+' Lv.'+p.lv+(p.m===P.map?'':' · 다른 지역'))].join('<br>');}
@@ -1834,6 +1843,7 @@ function showCreate(){const box=$('#sbox');let sel='kM',alloc={};
 function startGame(p){P=p;P.fx=P.x;P.fy=P.y;P.t=1;P.dir='S';P.face=180;P.hot=P.hot||[null,null,null,null,null,null];P.skills=Array.isArray(P.skills)?P.skills.filter(k=>SPELLS[k]):[];G.buffs={};G.bOn={};G.dead=false;
   $('#screen').classList.add('hidden');$('#hud').classList.remove('hidden');$('#logl').innerHTML='';
   log('리클라인에 오신 것을 환영합니다, '+P.name+'님.','c-sys');log('마을의 판도라에게서 물약을, 루엔에게서 제작을, 미르에게서 강화를 할 수 있습니다.','c-sys');
+  if(P.poly&&!POLY[P.poly.n])P.poly=null;if(P.poly)log('「'+P.poly.n+'」(으)로 변신한 상태입니다. 사망하면 변신이 풀립니다.','c-sys');
   enterMap(P.map||0,P.x||null,P.y||null);refreshUI();pushPresence(true);}
 
 // ---------- input ----------
