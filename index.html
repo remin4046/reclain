@@ -793,6 +793,7 @@ const NPC_LOOKS={
 function npcSprite(k){const key='n'+k;if(SPR[key])return SPR[key];if(k==='orc')return SPR[key]=monSprite('오크 전사','E',0);return SPR[key]=charSprite('npc_'+k,'S',0,NPC_LOOKS[k]);}
 
 // ---------- item helpers ----------
+GD.items['드래곤의 진주']={cat:'소비/제작',sub:'물약',kind:'물약',ds:null,dl:null,ac:null,cls:null,opt:'지속 시간 +600초',mat:'보석',wt:2,safe:null,price:null,how:null,mk:null,desc:'드래곤의 기운이 깃든 진주. 먹으면 10분간 이동·공격 속도가 한 단계 더 빨라집니다(3단 가속).'};
 const ITEM=n=>GD.items[n]||{cat:'소비/제작',sub:'기타',kind:'기타',wt:1};
 const isStack=n=>{const i=ITEM(n);return i.cat==='소비/제작'||i.sub==='화살'||i.cat==='마법/기술서'||n==='아데나';};
 const SLOT_OF={'한손검':'weapon','둔기':'weapon','창':'weapon','활':'weapon','지팡이':'weapon','단검':'weapon','양손검':'weapon','갑옷':'armor','투구':'helm','방패':'shield','티셔츠':'shirt','망토':'cloak','부츠':'boots','장갑':'gloves','목걸이':'amulet','벨트':'belt','반지':'ring'};
@@ -866,6 +867,7 @@ function calc(){
   const col={'한손검':'한손검','둔기':'도끼','창':'창','활':'활','지팡이':'지팡이','단검':'단검','양손검':'양손검'}[r.wsub]||'주먹';
   r.aspd=GD.speed[P.cls][col]||1000;r.mspd=(GD.speed[P.cls]['이동']||667)/2.5;
   if(b.haste>now){r.aspd*=0.75;r.mspd*=0.7;}
+  if(b.pearl>now){r.aspd*=0.875;r.mspd*=0.875;} // 드래곤의 진주(3단 가속)
   if(b.wafer>now)r.aspd*=0.75; // 엘븐 와퍼(요정 전용 공격속도 증가)
   return r;
 }
@@ -1009,6 +1011,7 @@ function useItem(it){const d=ITEM(it.n),n=it.n,C=calc();
   if(n==='마력 회복 물약'){P.mp=Math.min(P.mmp,P.mp+rnd(10,20));invRemove(n,1);refreshUI();return;}
   if(n==='속도향상 물약'||n==='강화 속도향상 물약'){G.buffs.haste=G.time+(n.startsWith('강화')?1800000:300000);invRemove(n,1);log('몸이 빨라졌습니다.','c-sys');addFx('heal',P.x,P.y,'#7fd');refreshUI();return;}
   if(n==='용기의 물약'){if(P.cls!=='knight'){log('기사만 사용할 수 있습니다.','c-bad');return;}G.buffs.haste=G.time+300000;invRemove(n,1);log('용기가 솟아납니다. (공격 속도 증가)','c-sys');refreshUI();return;}
+  if(n==='드래곤의 진주'){G.buffs.pearl=G.time+600000;G.pearlNote=1;invRemove(n,1);log('드래곤의 진주를 먹었습니다. 10분간 몸이 더욱 빨라집니다.','c-sys');addFx('heal',P.x,P.y,'#ffd36b');G.saveDirty=true;refreshUI();return;}
   if(n==='엘븐 와퍼'){if(P.cls!=='elf'){log('요정만 사용할 수 있습니다.','c-bad');return;}G.buffs.wafer=G.time+480000;G.waferNote=1;invRemove(n,1);log('엘븐 와퍼를 먹었습니다. 8분간 공격 속도가 빨라집니다.','c-sys');addFx('heal',P.x,P.y,'#9f9');G.saveDirty=true;refreshUI();return;}
   if(n==='귀환 주문서'){invRemove(n,1);addFx('tele',P.x,P.y);enterMap(0,32600,32936);refreshUI();return;}
   if(n==='순간이동 주문서'){const M=G.map;for(let k=0;k<200;k++){const x=rnd(M.ox,M.ox+M.W-1),y=rnd(M.oy,M.oy+M.H-1);if(M.walk(x,y)&&!M.npcs.some(q=>q.x===x&&q.y===y)){invRemove(n,1);addFx('tele',P.x,P.y);P.x=P.fx=x;P.y=P.fy=y;P.t=1;G.path=null;G.target=null;addFx('tele',x,y);pushPresence(true);refreshUI();return;}}return;}
@@ -1688,6 +1691,7 @@ function loop(t){const dt=Math.min(100,t-lastT);lastT=t;
     PERF.acc+=dt;PERF.n++;if(dt>PERF.worst)PERF.worst=dt;if(PERF.acc>=1000){PERF.fps=Math.round(PERF.n*1000/PERF.acc);PERF.hist.push(PERF.fps);if(PERF.hist.length>4)PERF.hist.shift();adaptQuality();$('#fps').textContent=PERF.fps+' FPS · '+QUALITY[PERF.q].name;showDiag();PERF.acc=0;PERF.n=0;PERF.worst=0;}
     saveT+=dt;if(saveT>20000){saveT=0;if(G.saveDirty)saveNow(true);}
     if(G.time%1000<dt)pushPresence();
+    if(G.pearlNote&&!(G.buffs.pearl>G.time)){G.pearlNote=0;log("드래곤의 진주의 효과가 사라졌습니다.","c-sys");}
     if(G.waferNote&&!(G.buffs.wafer>G.time)){G.waferNote=0;log("엘븐 와퍼의 효과가 사라졌습니다.","c-sys");}}
   requestAnimationFrame(loop);}
 async function boot(){loadExtSprites();cv=$('#cv');ctx=cv.getContext('2d',{alpha:false});resize();makeTex();setupInput();
