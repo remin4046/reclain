@@ -131,6 +131,10 @@ table.t th{color:var(--gold);position:sticky;top:0;background:#16110b}
 .hk.drop,.hk.pick{border-color:var(--gold2);box-shadow:0 0 8px rgba(243,221,156,.6)}
 #buffs{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}#buffs span{font-size:10.5px;padding:0 5px;border-radius:3px;background:rgba(120,90,170,.35);color:#eadcff;border:1px solid rgba(180,150,230,.35)}
 @media (max-width:760px){.skb{flex-direction:column}.skd{width:auto}.skgrid{max-height:30vh}}
+.sq[draggable=true]{cursor:grab}.sq.drag{opacity:.35}.sq.drop{border-color:#f3dd9c!important;box-shadow:inset 0 0 6px #000,0 0 9px rgba(243,221,156,.75)!important}.sq.bad{border-color:#c44!important}
+.bag.drop{outline:1px dashed #f3dd9c;outline-offset:2px}
+#qty{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:70;padding:14px 16px;width:280px}
+#qty h3{margin:0 0 8px;font-size:15px}#qty .row{display:flex;gap:6px;align-items:center;margin:8px 0}#qty input[type=number]{width:90px}#qty input[type=range]{flex:1}
 #online{position:absolute;right:10px;top:278px;padding:6px 8px;font-size:11.5px;max-width:200px}
 @media (max-width:760px){.chars{grid-template-columns:repeat(4,1fr)}#log{width:60vw;height:120px}#mini canvas{width:120px;height:120px}#inv{right:4px;width:94vw}}
 </style>
@@ -168,6 +172,7 @@ table.t th{color:var(--gold);position:sticky;top:0;background:#16110b}
     <div class="bar2"><span id="wmpos">-</span><span>클릭: 자동 이동 · 휠: 확대/축소 · 드래그: 지도 이동 · <a href="#" id="wmme" style="color:#e9c56a">내 위치로</a></span></div>
     <div class="leg"><span><i style="background:#fff"></i>나</span><span><i style="background:#6cf"></i>다른 플레이어</span><span><i style="background:#ffd65a"></i>NPC</span><span><i style="background:#c79bff"></i>포탈·입구</span><span><i style="background:#f55"></i>몬스터</span><span><i style="background:#7fe07f"></i>이동 경로</span></div></div>
   <div id="npc" class="win panel hidden"></div>
+  <div id="qty" class="panel hidden"></div>
 </div>
 <div id="tip" class="panel hidden"></div>
 <div id="toast"></div>
@@ -1563,7 +1568,7 @@ let hotSig='';function renderHot(force){const sig=JSON.stringify(P.hot.map(h=>h&
   d.onclick=()=>useHot(i);d.oncontextmenu=e=>{e.preventDefault();P.hot[i]=null;G.saveDirty=true;renderHot(true);};d.title=h?'우클릭: 비우기':'인벤토리에서 아이템 우클릭 / 마법 창(K)에서 마법 등록';hotDrop(d,i);el.appendChild(d);});}
 function hotCell(h,i){const sp=h&&h.startsWith('spell:')?h.slice(6):null;return'<b>'+(i+1)+'</b>'+(sp&&SPELLS[sp]?'<img src="'+skillIcon(sp)+'"><span>'+esc(SPELLS[sp].name)+'</span>':h?'<img src="'+itemIcon(h)+'"><span>'+esc(h)+'</span><s>'+invCount(h)+'</s>':'');}
 function hotDrop(d,i){d.ondragover=e=>{e.preventDefault();d.classList.add('drop');};d.ondragleave=()=>d.classList.remove('drop');
-  d.ondrop=e=>{e.preventDefault();d.classList.remove('drop');const v=e.dataTransfer.getData('text/plain');if(v&&v.startsWith('spell:')&&skillKnown(v.slice(6)))setHot(i,v);};}
+  d.ondrop=e=>{e.preventDefault();d.classList.remove('drop');const v=e.dataTransfer.getData('text/plain');if(v&&v.startsWith('spell:')&&skillKnown(v.slice(6)))setHot(i,v);else if(v&&v.startsWith('item:')){const it=invFind(v.slice(5));if(it)setHot(i,it.n);}};}
 function setHot(i,v){const j=P.hot.indexOf(v);if(j>=0&&j!==i)P.hot[j]=null;P.hot[i]=v;G.saveDirty=true;renderHot(true);if(!$('#skw').classList.contains('hidden'))renderSkw(true);log(hotLabel(v)+' → 단축키 '+(i+1),'c-sys');}
 function useHot(i){const h=P.hot[i];if(!h)return;if(h.startsWith('spell:')){castSpell(h.slice(6));return;}const it=P.inv.find(x=>x.n===h);if(!it){log(h+'이(가) 없습니다.','c-bad');return;}useItem(it);}
 function assignHot(v){let i=P.hot.indexOf(v);if(i>=0){toast('이미 '+(i+1)+'번에 등록됨');return;}i=P.hot.indexOf(null);if(i<0)i=5;P.hot[i]=v;G.saveDirty=true;renderHot(true);log(hotLabel(v)+' → 단축키 '+(i+1),'c-sys');}
@@ -1576,7 +1581,7 @@ function itemTip(it){const d=ITEM(it.n),L=[];L.push('<b>'+esc(itemName(it))+'</b
 function showTip(html,e){const t=$('#tip');t.innerHTML=html;t.classList.remove('hidden');const x=Math.min(e.clientX+14,innerWidth-290),y=Math.min(e.clientY+14,innerHeight-t.offsetHeight-6);t.style.left=x+'px';t.style.top=y+'px';}
 function hideTip(){$('#tip').classList.add('hidden');}
 function tipBind(el,fn){el.onmousemove=e=>showTip(fn(),e);el.onmouseleave=hideTip;}
-function slotHtml(it,lab,extra){return '<div class="sq '+(extra||'')+'" '+(it?'data-u="'+it.u+'"':'')+' title="">'+(it?'<img src="'+itemIcon(it.n)+'">'+(it.e?'<i class="en">+'+it.e+'</i>':'')+(it.q>1?'<i class="ct">'+(it.q>9999?Math.floor(it.q/1000)+'k':it.q)+'</i>':''):'<span>'+lab+'</span>')+'</div>';}
+function slotHtml(it,lab,extra,sk){return '<div class="sq '+(extra||'')+'" '+(it?'data-u="'+it.u+'" draggable="true"':'')+(sk?' data-s="'+sk+'"':'')+' title="">'+(it?'<img draggable="false" src="'+itemIcon(it.n)+'">'+(it.e?'<i class="en">+'+it.e+'</i>':'')+(it.q>1?'<i class="ct">'+(it.q>9999?Math.floor(it.q/1000)+'k':it.q)+'</i>':''):'<span>'+lab+'</span>')+'</div>';}
 function resist(C){const r={땅:0,물:0,불:0,바람:0};for(const[s]of SLOTS){const it=eqItem(s);if(!it)continue;const o=ITEM(it.n).opt||'';for(const k in r){const m=o.match(new RegExp(k+'\\s*(?:속성\\s*)?저항\\s*([+-]\\d+)'));if(m)r[k]+=+m[1];}}return r;}
 function renderInv(){const w=$('#inv');const eqU=new Set(Object.values(P.eq));
   let wt=0;P.inv.forEach(i=>wt+=(ITEM(i.n).wt||0)*i.q);const C=calc(),maxW=Math.floor((C.s.STR+C.s.CON)*90),need=expNeed(P.lv),mh=P.mhp+C.mhpB,mm=P.mmp+C.mmpB,R=resist(C);
@@ -1591,20 +1596,58 @@ function renderInv(){const w=$('#inv');const eqU=new Set(Object.values(P.eq));
    row('Magic Level',C.SP)+row('Magic Bonus',fx('INT→마법 보너스(MB)',C.s.INT))+row('MR',C.MR+'%')+'<tr class="sp"><td colspan=2></td></tr>'+
    '<tr class="hd"><td colspan=2>Resistance</td></tr>'+row('- earth',R.땅+' %')+row('- water',R.물+' %')+row('- fire',R.불+' %')+row('- wind',R.바람+' %')+row('ER',ER)+'</table></div>'+
    '<div class="pr"><canvas id="pdc" width="192" height="300"></canvas><div class="dollg">'+
-    '<div style="grid-area:helm">'+slotHtml(E('helm'),'투구')+'</div><div style="grid-area:amul">'+slotHtml(E('amulet'),'목걸이')+'</div>'+
-    '<div style="grid-area:shirt">'+slotHtml(E('shirt'),'티셔츠')+'</div><div style="grid-area:armor">'+slotHtml(E('armor'),'갑옷')+'</div><div style="grid-area:cloak">'+slotHtml(E('cloak'),'망토')+'</div>'+
-    '<div style="grid-area:wpn">'+slotHtml(E('weapon'),'무기')+'</div><div style="grid-area:glove">'+slotHtml(E('gloves'),'장갑')+'</div><div style="grid-area:shld">'+slotHtml(E('shield'),'방패')+'</div>'+
-    '<div style="grid-area:r1">'+slotHtml(E('ring1'),'반지')+'</div><div style="grid-area:belt">'+slotHtml(E('belt'),'벨트')+'</div><div style="grid-area:r2">'+slotHtml(E('ring2'),'반지')+'</div>'+
-    '<div style="grid-area:r3">'+slotHtml(E('ring3'),'반지')+'</div><div style="grid-area:boot">'+slotHtml(E('boots'),'부츠')+'</div><div style="grid-area:r4">'+slotHtml(E('ring4'),'반지')+'</div>'+
+    '<div style="grid-area:helm">'+slotHtml(E('helm'),'투구','','helm')+'</div><div style="grid-area:amul">'+slotHtml(E('amulet'),'목걸이','','amulet')+'</div>'+
+    '<div style="grid-area:shirt">'+slotHtml(E('shirt'),'티셔츠','','shirt')+'</div><div style="grid-area:armor">'+slotHtml(E('armor'),'갑옷','','armor')+'</div><div style="grid-area:cloak">'+slotHtml(E('cloak'),'망토','','cloak')+'</div>'+
+    '<div style="grid-area:wpn">'+slotHtml(E('weapon'),'무기','','weapon')+'</div><div style="grid-area:glove">'+slotHtml(E('gloves'),'장갑','','gloves')+'</div><div style="grid-area:shld">'+slotHtml(E('shield'),'방패','','shield')+'</div>'+
+    '<div style="grid-area:r1">'+slotHtml(E('ring1'),'반지','','ring1')+'</div><div style="grid-area:belt">'+slotHtml(E('belt'),'벨트','','belt')+'</div><div style="grid-area:r2">'+slotHtml(E('ring2'),'반지','','ring2')+'</div>'+
+    '<div style="grid-area:r3">'+slotHtml(E('ring3'),'반지','','ring3')+'</div><div style="grid-area:boot">'+slotHtml(E('boots'),'부츠','','boots')+'</div><div style="grid-area:r4">'+slotHtml(E('ring4'),'반지','','ring4')+'</div>'+
    '</div></div></div>'+
-   '<div class="note" style="margin:8px 0 4px;display:flex;justify-content:space-between"><span>아데나 <b style="color:#f3dd9c">'+fmt(P.gold)+'</b> · 무게 '+Math.round(wt)+'/'+maxW+'</span><span>클릭 사용·착용 · 우클릭 단축키 · Shift 버리기</span></div><div class="bag" id="itg"></div>';
+   '<div class="note" style="margin:8px 0 4px;display:flex;justify-content:space-between"><span>아데나 <b style="color:#f3dd9c">'+fmt(P.gold)+'</b> · 무게 '+Math.round(wt)+'/'+maxW+'</span><span>클릭 사용 · 우클릭 단축키 · 끌어서 이동 <button class="btn sm" data-sort style="padding:1px 6px;margin-left:4px">정렬</button></span></div><div class="bag" id="itg"></div>';
   w.querySelector('[data-c]').onclick=()=>toggleWin('inv');
   const pc=w.querySelector('#pdc').getContext('2d');pc.globalAlpha=.32;pc.drawImage(charSprite(P.look,'S',0),0,0);
-  const ig=w.querySelector('#itg');ig.innerHTML=P.inv.filter(i=>!eqU.has(i.u)).sort((a,b)=>(ITEM(a.n).cat||'').localeCompare(ITEM(b.n).cat||'')||a.n.localeCompare(b.n)).map(it=>slotHtml(it,'')).join('')+'<div class="sq e"></div>'.repeat(Math.max(0,24-P.inv.length));
+  const ig=w.querySelector('#itg');const bagI=P.inv.filter(i=>!eqU.has(i.u));ig.innerHTML=bagI.map(it=>slotHtml(it,'')).join('')+'<div class="sq e" data-end></div>'.repeat(Math.max(1,27-bagI.length));
+  w.querySelector('[data-sort]').onclick=()=>{sortInv();renderInv();};invDnd(w,eqU);
   w.querySelectorAll('.sq[data-u]').forEach(el=>{const it=invFind(el.dataset.u);if(!it)return;const worn=eqU.has(it.u);
-    el.onclick=e=>{hideTip();if(e.shiftKey&&!worn){dropItem(it);return;}worn?toggleEquip(it):useItem(it);};
+    el.onclick=e=>{hideTip();if(e.shiftKey&&!worn){askDrop(it);return;}worn?toggleEquip(it):useItem(it);};
     el.oncontextmenu=e=>{e.preventDefault();if(!worn)assignHot(it.n);};tipBind(el,()=>itemTip(it)+(worn?'<br><span class="note">클릭: 착용 해제</span>':''));});}
-function dropItem(it){const q=it.q;P.inv.splice(P.inv.indexOf(it),1);G.ground.push({n:it.n,q,e:it.e,x:P.x+1,y:P.y,map:G.map.id,t:G.time});log(itemName(it)+'을(를) 버렸습니다.','c-sys');G.saveDirty=true;refreshUI();}
+function dropItem(it,q,at){if(Object.values(P.eq).includes(it.u)){log('착용 중인 아이템은 버릴 수 없습니다. 먼저 벗으세요.','c-bad');return;}
+  q=Math.max(1,Math.min(it.q,q||it.q));let[x,y]=at||[P.x+1,P.y];if(!G.map.walk(x,y)||Math.max(Math.abs(x-P.x),Math.abs(y-P.y))>3)[x,y]=findNear(G.map,P.x,P.y);
+  if(q>=it.q)P.inv.splice(P.inv.indexOf(it),1);else it.q-=q;
+  G.ground.push({n:it.n,q,e:it.e,x,y,map:G.map.id,t:G.time});P.hot=P.hot.map(h=>h===it.n&&!invCount(it.n)?null:h);
+  log(itemName(it)+(q>1?' '+fmt(q)+'개':'')+'을(를) 버렸습니다.','c-sys');G.saveDirty=true;renderHot(true);refreshUI();}
+function askDrop(it,at){if(Object.values(P.eq).includes(it.u)){log('착용 중인 아이템은 버릴 수 없습니다. 먼저 벗으세요.','c-bad');return;}
+  if(it.q<=1){dropItem(it,1,at);return;}const w=$('#qty');w.classList.remove('hidden');
+  w.innerHTML='<h3 class="ttl">'+esc(it.n)+' 버리기</h3><div class="note">몇 개를 버릴까요? (보유 '+fmt(it.q)+'개)</div><div class="row"><input type="range" min="1" max="'+it.q+'" value="'+it.q+'"><input class="tx" type="number" min="1" max="'+it.q+'" value="'+it.q+'"></div><div class="row" style="justify-content:flex-end"><button class="btn sm" data-n>취소</button><button class="btn sm" data-y>버리기</button></div>';
+  const r=w.querySelector('[type=range]'),n=w.querySelector('[type=number]');r.oninput=()=>n.value=r.value;n.oninput=()=>r.value=n.value;n.focus();n.select();
+  const close=()=>w.classList.add('hidden');const ok=()=>{const v=parseInt(n.value,10);close();if(v>0)dropItem(it,v,at);};
+  w.querySelector('[data-n]').onclick=close;w.querySelector('[data-y]').onclick=ok;n.onkeydown=e=>{if(e.key==='Enter')ok();if(e.key==='Escape')close();e.stopPropagation();};}
+function sortInv(){P.inv.sort((a,b)=>(ITEM(a.n).cat||'').localeCompare(ITEM(b.n).cat||'')||a.n.localeCompare(b.n)||(b.e||0)-(a.e||0));G.saveDirty=true;}
+// ---------- 끌어다 놓기 ----------
+let DRAG=null;
+function invDnd(w,eqU){const clr=()=>w.querySelectorAll('.drop,.bad').forEach(x=>x.classList.remove('drop','bad'));
+  w.querySelectorAll('.sq[data-u]').forEach(el=>{const it=invFind(el.dataset.u);if(!it)return;
+    el.ondragstart=e=>{hideTip();DRAG={u:it.u,worn:eqU.has(it.u)};e.dataTransfer.setData('text/plain','item:'+it.u);e.dataTransfer.effectAllowed='move';el.classList.add('drag');};
+    el.ondragend=()=>{el.classList.remove('drag');clr();setTimeout(()=>DRAG=null,0);};});
+  // 장비 칸
+  w.querySelectorAll('.dollg .sq[data-s]').forEach(el=>{const sk=el.dataset.s;
+    el.ondragover=e=>{if(!DRAG)return;e.preventDefault();const it=invFind(DRAG.u);el.classList.add(it&&fitsSlot(it.n,sk)?'drop':'bad');};
+    el.ondragleave=()=>el.classList.remove('drop','bad');
+    el.ondrop=e=>{e.preventDefault();clr();const it=DRAG&&invFind(DRAG.u);if(!it)return;equipTo(it,sk);};});
+  // 가방 칸 / 가방 영역
+  const bag=w.querySelector('#itg');
+  bag.ondragover=e=>{if(!DRAG)return;e.preventDefault();bag.classList.add('drop');};bag.ondragleave=e=>{if(!bag.contains(e.relatedTarget))bag.classList.remove('drop');};
+  bag.ondrop=e=>{e.preventDefault();bag.classList.remove('drop');clr();const it=DRAG&&invFind(DRAG.u);if(!it)return;
+    if(DRAG.worn){toggleEquip(it);return;}
+    const t=e.target.closest('.sq');const tgt=t&&t.dataset.u?invFind(t.dataset.u):null;if(tgt===it)return;
+    P.inv.splice(P.inv.indexOf(it),1);if(tgt){const i=P.inv.indexOf(tgt);P.inv.splice(i,0,it);}else P.inv.push(it);G.saveDirty=true;renderInv();};
+  bag.querySelectorAll('.sq').forEach(el=>{el.addEventListener('dragover',()=>{if(DRAG&&el.dataset.u!==DRAG.u){bag.querySelectorAll('.drop').forEach(x=>x.classList.remove('drop'));el.classList.add('drop');}});el.addEventListener('dragleave',()=>el.classList.remove('drop'));});}
+function fitsSlot(n,sk){const s=slotOf(n);return!!s&&(s===sk||(s==='ring'&&sk.startsWith('ring')));}
+function equipTo(it,sk){if(!fitsSlot(it.n,sk)){log(it.n+'은(는) 그 칸에 착용할 수 없습니다.','c-bad');return;}
+  const cur=Object.entries(P.eq).find(([,u])=>u===it.u);if(cur&&cur[0]===sk)return;
+  if(!canUse(it.n,P.cls)){log(CLSNAME[P.cls]+'은(는) '+it.n+'을(를) 사용할 수 없습니다.','c-bad');return;}
+  if(sk==='shield'){const w=eqItem('weapon');if(w&&twoHand(w.n)){log('양손 무기를 들고 있어 방패를 착용할 수 없습니다.','c-bad');return;}}
+  if(cur)delete P.eq[cur[0]];if(sk==='weapon'&&twoHand(it.n)&&P.eq.shield){delete P.eq.shield;log('방패를 벗었습니다.','c-sys');}
+  P.eq[sk]=it.u;log(itemName(it)+' 착용','c-sys');G.saveDirty=true;refreshUI();}
 function renderChr(){const w=$('#chr'),C=calc(),cl=GD.classes[P.cls];
   const rows=[['클래스',LOOKS[P.look].name+' ('+CLSNAME[P.cls]+')'],['레벨',P.lv],...STATS.map(k=>[k,C.s[k]+(C.s[k]!==P.stats[k]?' ('+P.stats[k]+')':'')]),['AC',C.AC],['MR',C.MR],['SP',C.SP],['근거리 추가 대미지',C.mdmg],['원거리 추가 대미지',C.rdmg],['공격 속도',C.aspd+'ms'],['이동 속도',C.mspd+'ms/칸'],['HP 회복/틱',C.hpTick],['MP 회복/틱',C.mpTick]];
   let h='<h3 class="ttl">캐릭터 정보 <span class="x" data-c>✕</span></h3><div class="kv">'+rows.map(([a,b])=>'<span>'+a+'</span><span>'+esc(b)+'</span>').join('')+'</div>';
@@ -1890,6 +1933,8 @@ function setupInput(){
   addEventListener('blur',()=>{G.keys={};});
   cv.addEventListener('mousemove',e=>{G.mouse=[e.clientX,e.clientY];if(P)G.hover=pickAt(e.clientX,e.clientY);});
   cv.addEventListener('contextmenu',e=>e.preventDefault());
+  cv.addEventListener('dragover',e=>{if(DRAG&&!DRAG.worn){e.preventDefault();e.dataTransfer.dropEffect='move';}});
+  cv.addEventListener('drop',e=>{e.preventDefault();const it=DRAG&&invFind(DRAG.u);if(!it||!P||G.dead)return;askDrop(it,worldAt(e.clientX,e.clientY));});
   cv.addEventListener('mousedown',e=>{if(!P||G.dead||e.button!==0)return;const o=pickAt(e.clientX,e.clientY);
     if(o&&o.hp!=null){G.target=o;G.path=null;return;}
     if(o&&o.role){const d=Math.max(Math.abs(o.x-P.x),Math.abs(o.y-P.y));if(d<=2){openNpc(o);return;}G.target=null;G.path=findPath(P.x,P.y,o.x,o.y,5000,1);G.npcGo=o;return;}
